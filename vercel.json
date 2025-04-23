@@ -1,0 +1,10 @@
+{
+  "buildCommand": "prisma generate && next build",
+  "installCommand": "pnpm install",
+  "framework": "nextjs",
+  "outputDirectory": ".next",
+  "regions": ["fra1"],
+  "env": {
+    "NEXT_PHASE": "phase-production-build"
+  }
+}
