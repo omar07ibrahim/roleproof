@@ -1,0 +1,14 @@
+{
+  "name": "roleproof-containment",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Static containment boundary for the retired legacy runtime.",
+  "engines": {
+    "node": ">=22 <25"
+  },
+  "scripts": {
+    "build": "node tools/build-site.mjs",
+    "test": "npm run build && node --test",
+    "check": "npm test && npm audit --omit=dev"
+  }
+}
