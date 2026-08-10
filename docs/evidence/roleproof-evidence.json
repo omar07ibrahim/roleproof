@@ -92,8 +92,8 @@
   "format": "roleproof.evidence.v1",
   "policy_sha256": "f022e5ebe24dd5f7995b08b5aea3d3785bc9a9f98d7b8d4f0b4e4155c28c157a",
   "result_sha256": "10d2ba62b719bf2c7aa7490efd6a6a466c1c2aa345dcde24f6cc098de50f0abf",
-  "source_revision": "98462bc4e0e4fe4fb5c44225b7839303b560ab6f",
-  "source_tree": "30b74da7e8e3a8b44585d4da8e2b51b01d377fcc",
+  "source_revision": "22e53ab095cf39abaf83e2ca3b0ac5a5aa7b795b",
+  "source_tree": "26f1c56832e1ed2ca7a4d9bf774810bc0f434c3d",
   "sources": [
     {
       "bytes": 2584,
@@ -141,9 +141,9 @@
       "sha256": "e426032a0d70f2e4794bbb1c00ec7aadc8a9fefbb8016d139c1b4834326911d4"
     },
     {
-      "bytes": 5425,
+      "bytes": 5479,
       "path": "src/cli.mjs",
-      "sha256": "534c5bd44193b8738b172bbdc40e0dbf7b9da432f0b7e912b66051c14c9e9ff4"
+      "sha256": "62c980ae69be66dc837c33f42e1b81b914823c2850e5f4ca243f9a52fc76bc3a"
     },
     {
       "bytes": 9558,
