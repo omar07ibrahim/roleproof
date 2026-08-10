@@ -1,0 +1,35 @@
+{
+  "schema_version": "roleproof.policy.v1",
+  "title": "Orion Cloud synthetic access review",
+  "principals": [
+    {"id": "alice-intern", "assigned_roles": ["intern"]},
+    {"id": "bob-builder", "assigned_roles": ["developer"]},
+    {"id": "carol-approver", "assigned_roles": ["approver"]},
+    {"id": "dave-payroll", "assigned_roles": ["payroll-analyst"]}
+  ],
+  "roles": [
+    {"id": "intern", "inherits": ["support-reader"], "can_assume": ["contractor"], "grants": []},
+    {"id": "contractor", "inherits": [], "can_assume": ["developer"], "grants": []},
+    {"id": "support-reader", "inherits": [], "can_assume": [], "grants": [{"resource": "support-console", "actions": ["read"]}]},
+    {"id": "developer", "inherits": ["ci-operator"], "can_assume": ["release-manager"], "grants": [{"resource": "build-registry", "actions": ["write"]}]},
+    {"id": "ci-operator", "inherits": [], "can_assume": [], "grants": [{"resource": "build-registry", "actions": ["read"]}]},
+    {"id": "release-manager", "inherits": [], "can_assume": ["prod-admin"], "grants": []},
+    {"id": "prod-admin", "inherits": [], "can_assume": [], "grants": [{"resource": "payroll-ledger", "actions": ["read"]}, {"resource": "production", "actions": ["admin", "deploy"]}]},
+    {"id": "requester", "inherits": [], "can_assume": [], "grants": []},
+    {"id": "approver", "inherits": ["requester"], "can_assume": [], "grants": []},
+    {"id": "payroll-analyst", "inherits": [], "can_assume": [], "grants": [{"resource": "payroll-ledger", "actions": ["read"]}]}
+  ],
+  "resources": [
+    {"id": "build-registry", "sensitivity": "high"},
+    {"id": "payroll-ledger", "sensitivity": "critical"},
+    {"id": "production", "sensitivity": "critical"},
+    {"id": "support-console", "sensitivity": "medium"}
+  ],
+  "constraints": [
+    {"id": "intern-no-prod-deploy", "kind": "deny_access", "principal": "alice-intern", "resource": "production", "action": "deploy", "severity": "critical"},
+    {"id": "builder-no-prod-admin", "kind": "deny_access", "principal": "bob-builder", "resource": "production", "action": "admin", "severity": "critical"},
+    {"id": "approver-no-request", "kind": "separation_of_duties", "principal": "carol-approver", "roles": ["approver", "requester"], "severity": "high"},
+    {"id": "intern-no-payroll", "kind": "deny_access", "principal": "alice-intern", "resource": "payroll-ledger", "action": "read", "severity": "critical"},
+    {"id": "payroll-no-prod-deploy", "kind": "deny_access", "principal": "dave-payroll", "resource": "production", "action": "deploy", "severity": "high"}
+  ]
+}

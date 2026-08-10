@@ -1,16 +1,24 @@
-# test2 — legacy runtime retired
+# RoleProof
 
-The historical AeroCRM prototype in this repository is **not a supported or
-deployed application**. Its executable tree was retired before the repository
-was rebuilt because the prototype combined an unauthenticated initialization
-route, a predictable bootstrap account, disabled build-time checks, and an
-incomplete dependency lock.
+RoleProof is a dependency-free symbolic AI and security laboratory for
+explaining how a bounded RBAC graph violates explicit access constraints.
 
-Do not deploy or copy historical revisions. They remain in Git only as
-provenance for this repository's evolution.
+The rebuild starts with a strict roleproof.policy.v1 contract: duplicate-key
+JSON rejection, bounded graph sizes, typed inheritance and assumption edges,
+canonical normalization, race-aware regular-file reads, and synthetic data
+only. Deterministic shortest witnesses, independent verification, the CLI,
+dashboard, and reproducible evidence are added in subsequent reviewed commits.
 
-The next reviewed revision will introduce **RoleProof**, a dependency-free
-symbolic access-policy laboratory for bounded RBAC graphs, independently
-verified escalation witnesses, and reproducible visual evidence.
+Install with npm ci and run the current contract suite with npm test.
 
-See [SECURITY.md](SECURITY.md) for the support boundary.
+The synthetic Orion policy in examples/orion.synthetic.json demonstrates
+multi-hop access paths without using employee records or live IAM exports.
+
+See [the policy contract](docs/policy-contract.md) and
+[the security boundary](SECURITY.md).
+
+## Claim boundary
+
+RoleProof analyzes only the declared bounded model. It is not a live IAM
+scanner, authorization engine, compliance certification, or proof that an
+external provider enforces the modeled policy.

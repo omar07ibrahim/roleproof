@@ -1,18 +1,16 @@
-name: Containment CI
+name: Quality
 
 on:
   pull_request:
   push:
-    branches:
-      - master
-      - security/retire-legacy-crm
+    branches: [main]
 
 permissions:
   contents: read
 
 jobs:
-  verify:
-    name: Static boundary (Node 22.23.1)
+  core:
+    name: Core (Node 22.23.1)
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
@@ -25,9 +23,9 @@ jobs:
         with:
           node-version: "22.23.1"
           package-manager-cache: false
-      - name: Install the empty locked dependency graph
+      - name: Install empty locked dependency graph
         run: npm ci --ignore-scripts
-      - name: Verify build, tests, and dependency audit
+      - name: Verify contracts and behavior
         run: npm run check
       - name: Enforce read-only verification
         run: |
