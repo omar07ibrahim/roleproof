@@ -22,8 +22,12 @@ test("the source-derived role graph is deterministic and complete", async () => 
   assert.equal((svg.match(/data-role-id=/g) ?? []).length, policy.roles.length);
   assert.equal(svg.includes("<script"), false);
   assert.equal(svg.includes("<foreignObject"), false);
-  assert.equal(svg.includes("http://"), false);
+  const namespace = "http://www.w3.org/2000/svg";
+  assert.equal((svg.match(/http:\/\//g) ?? []).length, 1);
+  assert.equal(svg.includes(namespace), true);
+  assert.equal(svg.replace(namespace, "").includes("http://"), false);
   assert.equal(svg.includes("https://"), false);
+  assert.equal(svg.includes(" href="), false);
   assert.equal(svg.includes("/home/"), false);
 });
 
