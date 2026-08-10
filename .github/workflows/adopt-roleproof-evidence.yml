@@ -1,0 +1,187 @@
+name: Refresh RoleProof evidence
+
+on:
+  push:
+    branches: [feature/roleproof]
+
+permissions:
+  contents: write
+
+jobs:
+  capture:
+    name: Reproducible evidence adoption
+    if: >-
+      github.repository == 'omar07ibrahim/roleproof' &&
+      github.actor == 'omar07ibrahim' &&
+      github.event.head_commit.message == 'Refresh RoleProof portfolio evidence'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    env:
+      CONTAINER_IMAGE: mcr.microsoft.com/playwright/python@sha256:51d31fdfacb0cff99a1a724152e34ae408d2bd4e7da310ff157450f49261cc59
+    steps:
+      - name: Check out exact guarded revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+          ref: ${{ github.sha }}
+
+      - name: Confirm immutable trigger
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${{ github.sha }}"
+          test "$(git log -1 --format=%s)" = "Refresh RoleProof portfolio evidence"
+          test "$(git log -1 --format=%an)" = "Omar Ibrahim"
+          test "$(git log -1 --format=%ae)" = "31526072+omar07ibrahim@users.noreply.github.com"
+          test "$(git rev-list --parents -n 1 HEAD | wc -w)" -eq 2
+
+      - name: Derive source-bound revision
+        shell: bash
+        run: |
+          set -euo pipefail
+          SOURCE_REVISION="$(git log -1 --format=%H -- examples package-lock.json package.json requirements src tools/build-site.mjs tools/capture_evidence.py web)"
+          SOURCE_TREE="$(git rev-parse "$SOURCE_REVISION^{tree}")"
+          for value in "$SOURCE_REVISION" "$SOURCE_TREE"; do
+            test "$(printf '%s' "$value" | wc -c)" -eq 40
+            case "$value" in *[!0-9a-f]*) exit 1;; esac
+          done
+          echo "SOURCE_REVISION=$SOURCE_REVISION" >>"$GITHUB_ENV"
+          echo "SOURCE_TREE=$SOURCE_TREE" >>"$GITHUB_ENV"
+
+      - name: Install exact Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "22.23.1"
+          package-manager-cache: false
+
+      - name: Build and bind actual CLI output
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile tools/capture_evidence.py
+          npm ci --ignore-scripts
+          npm test
+          npm run build
+          input="$RUNNER_TEMP/roleproof-evidence-input"
+          install -d -m 700 "$input"
+          (
+            cd "$input"
+            node "$GITHUB_WORKSPACE/src/cli.mjs" audit "$GITHUB_WORKSPACE/examples/orion.synthetic.json" --out roleproof-audit >audit.stdout.txt
+          )
+          cmp "$input/roleproof-audit/analysis.receipt.json" dist/data/analysis.receipt.json
+          cmp "$input/roleproof-audit/policy.normalized.json" dist/data/policy.normalized.json
+          cmp "$input/roleproof-audit/verification.json" dist/data/verification.json
+          cmp "$input/roleproof-audit/manifest.json" dist/data/manifest.json
+          rm -rf "$input/roleproof-audit"
+
+      - name: Set up exact wheel-download Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v6.2.0
+        with:
+          python-version: "3.12.3"
+
+      - name: Download hash-locked evidence wheels
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/evidence-wheelhouse"
+          python -m pip download --require-hashes --only-binary=:all: --dest "$RUNNER_TEMP/evidence-wheelhouse" -r requirements/evidence-browser.txt
+          test "$(find "$RUNNER_TEMP/evidence-wheelhouse" -maxdepth 1 -type f | wc -l)" -eq 5
+
+      - name: Pull platform-pinned browser
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker pull --platform linux/amd64 "$CONTAINER_IMAGE"
+          test "$(docker image inspect "$CONTAINER_IMAGE" --format '{{.Architecture}}/{{.Os}}')" = "amd64/linux"
+
+      - name: Capture twice and require byte equality
+        shell: bash
+        run: |
+          set -euo pipefail
+          capture_once() {
+            local output_name="$1"
+            docker run --rm \
+              --platform linux/amd64 \
+              --pull=never \
+              --network=none \
+              --read-only \
+              --cap-drop=ALL \
+              --security-opt=no-new-privileges \
+              --pids-limit=512 \
+              --memory=4g \
+              --cpus=2 \
+              --shm-size=1g \
+              --tmpfs /tmp:rw,exec,nosuid,nodev,size=2147483648 \
+              --user "$(id -u):$(id -g)" \
+              --env HOME=/tmp/home \
+              --env PYTHONNOUSERSITE=1 \
+              --env PYTHONPATH=/src:/tmp/evidence-python \
+              --env SOURCE_REVISION \
+              --env SOURCE_TREE \
+              --env CONTAINER_IMAGE \
+              --env OUTPUT_NAME="$output_name" \
+              --volume "$GITHUB_WORKSPACE:/src:ro" \
+              --volume "$RUNNER_TEMP/evidence-wheelhouse:/wheelhouse:ro" \
+              --volume "$RUNNER_TEMP:/out:rw" \
+              --entrypoint bash \
+              "$CONTAINER_IMAGE" \
+              -euo pipefail -c '
+                mkdir -p "$HOME" /tmp/evidence-python
+                python -m pip install --no-index --find-links=/wheelhouse --target=/tmp/evidence-python Pillow==12.3.0 playwright==1.62.0
+                python /src/tools/capture_evidence.py generate --root /src --input-root /out/roleproof-evidence-input --output-root "/out/$OUTPUT_NAME" --source-revision "$SOURCE_REVISION" --source-tree "$SOURCE_TREE" --container-image "$CONTAINER_IMAGE"
+                python /src/tools/capture_evidence.py verify --root /src --output-root "/out/$OUTPUT_NAME" --source-revision "$SOURCE_REVISION" --source-tree "$SOURCE_TREE" --container-image "$CONTAINER_IMAGE"
+              '
+          }
+          capture_once roleproof-candidate-one
+          capture_once roleproof-candidate-two
+          for candidate in roleproof-candidate-one roleproof-candidate-two; do
+            test "$(find "$RUNNER_TEMP/$candidate" -type f | wc -l)" -eq 12
+            test -z "$(find "$RUNNER_TEMP/$candidate" -type l -print -quit)"
+          done
+          one="$RUNNER_TEMP/roleproof-candidate-one"
+          two="$RUNNER_TEMP/roleproof-candidate-two"
+          while IFS= read -r relative; do
+            test -f "$two/$relative"
+            cmp "$one/$relative" "$two/$relative"
+          done < <(find "$one" -type f -printf '%P\n' | LC_ALL=C sort)
+          test "$(find "$two" -type f -printf '%P\n' | LC_ALL=C sort | sha256sum)" = "$(find "$one" -type f -printf '%P\n' | LC_ALL=C sort | sha256sum)"
+
+      - name: Commit exact evidence inventory
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf docs/evidence
+          mkdir -p docs
+          cp -R "$RUNNER_TEMP/roleproof-candidate-one/docs/evidence" docs/evidence
+          git add docs/evidence
+          expected="$(printf '%s\n' \
+            docs/evidence/roleproof-analysis.json \
+            docs/evidence/roleproof-cli.png \
+            docs/evidence/roleproof-cli.txt \
+            docs/evidence/roleproof-constraint-summary.svg \
+            docs/evidence/roleproof-dashboard.png \
+            docs/evidence/roleproof-evidence.json \
+            docs/evidence/roleproof-full-page.png \
+            docs/evidence/roleproof-interaction.gif \
+            docs/evidence/roleproof-mobile.png \
+            docs/evidence/roleproof-role-graph.svg \
+            docs/evidence/roleproof-verification-architecture.svg \
+            docs/evidence/roleproof-verification.json)"
+          actual="$(git diff --cached --name-only)"
+          test -n "$actual"
+          printf '%s\n' "$actual" | while IFS= read -r path; do
+            printf '%s\n' "$expected" | grep -Fx -- "$path" >/dev/null
+          done
+          printf '%s\n' "$actual" | grep -Fx -- docs/evidence/roleproof-evidence.json >/dev/null
+          test "$(find docs/evidence -type f | wc -l)" -eq 12
+          test -z "$(git diff --name-only)"
+          git diff --cached --check
+          git config user.name "Omar Ibrahim"
+          git config user.email "31526072+omar07ibrahim@users.noreply.github.com"
+          git commit -m "Refresh source-bound RoleProof evidence"
+          test "$(git log -1 --format=%an)" = "Omar Ibrahim"
+          test "$(git log -1 --format=%ae)" = "31526072+omar07ibrahim@users.noreply.github.com"
+          test "$(git log -1 --format=%cn)" = "Omar Ibrahim"
+          test "$(git log -1 --format=%ce)" = "31526072+omar07ibrahim@users.noreply.github.com"
+          git push origin HEAD:feature/roleproof
