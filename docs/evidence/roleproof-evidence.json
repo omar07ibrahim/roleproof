@@ -92,8 +92,8 @@
   "format": "roleproof.evidence.v1",
   "policy_sha256": "f022e5ebe24dd5f7995b08b5aea3d3785bc9a9f98d7b8d4f0b4e4155c28c157a",
   "result_sha256": "10d2ba62b719bf2c7aa7490efd6a6a466c1c2aa345dcde24f6cc098de50f0abf",
-  "source_revision": "a1028e3e723e51762fe020e1f18150998c8a9b50",
-  "source_tree": "e433fe13372cffd261c9ac4bf9320357ca1643a2",
+  "source_revision": "2a9519f23b5b0ad07fe4aded6367aa535ffb88c7",
+  "source_tree": "0babbda1c9d516341a8372cc4a32303d343bf40b",
   "sources": [
     {
       "bytes": 2584,
@@ -141,19 +141,19 @@
       "sha256": "e426032a0d70f2e4794bbb1c00ec7aadc8a9fefbb8016d139c1b4834326911d4"
     },
     {
-      "bytes": 4361,
+      "bytes": 4127,
       "path": "src/cli.mjs",
-      "sha256": "86b2fabb819935ce4ab2aed640e2abdf3177baa889a04023d096b5f0d76ccf60"
+      "sha256": "b85e33c46aba91fb1e800279c9e65cd2b80e5af654f2ba7957d52fb24b87dd67"
     },
     {
-      "bytes": 10083,
+      "bytes": 9558,
       "path": "src/contracts.mjs",
-      "sha256": "bfae5efe8a70650c95d612dbdd572fb46b5fd19e04cedcac61f6fafbe50998c5"
+      "sha256": "67e0baf9ee3daf1ddb451c46e35e0d7b3098496531e4e10ef6182e7d3c1d408b"
     },
     {
-      "bytes": 4323,
+      "bytes": 3765,
       "path": "src/io.mjs",
-      "sha256": "4063a6b1a847c53d265fdfbc1bfdbb1cc73a487b5b235a4111ed5c921d0aa14f"
+      "sha256": "0068410af1b7f30ccaf85604059a41e4e470f04130e9d8db305db3d3cb9d98e7"
     },
     {
       "bytes": 4193,
