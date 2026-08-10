@@ -4,6 +4,7 @@ import { analyzePolicy } from "./analyze.mjs";
 import { writeAuditBundle } from "./bundle.mjs";
 import { readPolicyFile } from "./contracts.mjs";
 import { readStrictJsonFile } from "./io.mjs";
+import { runServerUntilSignal } from "./server.mjs";
 import { verifyReceipt } from "./verify.mjs";
 
 function usage() {
@@ -12,6 +13,7 @@ function usage() {
     "  roleproof audit POLICY --out DIRECTORY",
     "  roleproof analyze POLICY",
     "  roleproof verify POLICY RECEIPT",
+    "  roleproof serve [--port PORT]",
   ].join("\n");
 }
 
@@ -66,11 +68,26 @@ async function verify(arguments_) {
   process.stdout.write(json(verifyReceipt(policy, receipt)));
 }
 
+async function serve(arguments_) {
+  let port = 4173;
+  if (arguments_.length !== 0) {
+    if (arguments_.length !== 2 || arguments_[0] !== "--port") {
+      throw new Error("invalid_arguments");
+    }
+    port = Number(arguments_[1]);
+    if (!Number.isInteger(port) || port < 1024 || port > 65535) {
+      throw new Error("invalid_arguments");
+    }
+  }
+  await runServerUntilSignal({ port });
+}
+
 async function main(argv) {
   const [command, ...arguments_] = argv;
   if (command === "audit") return audit(arguments_);
   if (command === "analyze") return analyze(arguments_);
   if (command === "verify") return verify(arguments_);
+  if (command === "serve") return serve(arguments_);
   process.stderr.write(usage() + "\n");
   process.exitCode = 64;
 }
