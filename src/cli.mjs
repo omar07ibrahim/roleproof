@@ -87,17 +87,29 @@ function invalidCommand() {
   process.exitCode = 64;
 }
 
-const COMMANDS = new Map([
-  ["audit", audit],
-  ["analyze", analyze],
-  ["serve", serve],
-  ["verify", verify],
-]);
+function canonicalCommand(value) {
+  if (value === "audit") return "audit";
+  if (value === "analyze") return "analyze";
+  if (value === "serve") return "serve";
+  if (value === "verify") return "verify";
+  return undefined;
+}
 
 async function main(argv) {
-  const [command, ...arguments_] = argv;
-  const handler = COMMANDS.get(command) ?? invalidCommand;
-  return handler(arguments_);
+  const command = canonicalCommand(argv[0]);
+  const arguments_ = argv.slice(1);
+  switch (command) {
+    case "audit":
+      return audit(arguments_);
+    case "analyze":
+      return analyze(arguments_);
+    case "serve":
+      return serve(arguments_);
+    case "verify":
+      return verify(arguments_);
+    default:
+      return invalidCommand();
+  }
 }
 
 try {
