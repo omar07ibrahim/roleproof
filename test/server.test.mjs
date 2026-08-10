@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { execFileSync } from "node:child_process";
+import { execFileSync, spawnSync } from "node:child_process";
 import http from "node:http";
 import test from "node:test";
 
@@ -76,7 +76,7 @@ test("the dashboard server is loopback-only and fail-closed", async () => {
 
 test("CLI rejects privileged, malformed, and oversized ports", () => {
   for (const value of ["0", "80", "3.5", "65536", "not-a-port"]) {
-    const result = (await import("node:child_process")).spawnSync(
+    const result = spawnSync(
       process.execPath,
       ["src/cli.mjs", "serve", "--port", value],
       { encoding: "utf8" },
