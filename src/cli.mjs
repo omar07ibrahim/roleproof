@@ -1,11 +1,34 @@
 #!/usr/bin/env node
 
+import path from "node:path";
+
 import { analyzePolicy } from "./analyze.mjs";
 import { writeAuditBundle } from "./bundle.mjs";
 import { readPolicyFile } from "./contracts.mjs";
 import { readStrictJsonFile } from "./io.mjs";
 import { runServerUntilSignal } from "./server.mjs";
 import { verifyReceipt } from "./verify.mjs";
+
+const WORKSPACE_ROOT = path.resolve(process.cwd());
+
+function workspacePath(value) {
+  if (
+    typeof value !== "string" ||
+    value.length < 1 ||
+    value.length > 4096 ||
+    value.includes("\u0000")
+  ) {
+    throw new Error("invalid_arguments");
+  }
+  const candidate = path.resolve(WORKSPACE_ROOT, value);
+  const prefix = WORKSPACE_ROOT.endsWith(path.sep)
+    ? WORKSPACE_ROOT
+    : WORKSPACE_ROOT + path.sep;
+  if (!candidate.startsWith(prefix)) {
+    throw new Error("invalid_arguments");
+  }
+  return candidate;
+}
 
 function usage() {
   return [
@@ -30,8 +53,11 @@ async function audit(arguments_) {
   ) {
     throw new Error("invalid_arguments");
   }
-  const policy = await readPolicyFile(arguments_[0]);
-  const built = await writeAuditBundle(policy, arguments_[2]);
+  const policy = await readPolicyFile(
+    workspacePath(arguments_[0]),
+    WORKSPACE_ROOT,
+  );
+  const built = await writeAuditBundle(policy, workspacePath(arguments_[2]));
   const summary = built.receipt.result.summary;
   process.stdout.write(
     [
@@ -55,7 +81,11 @@ async function analyze(arguments_) {
     throw new Error("invalid_arguments");
   }
   process.stdout.write(
-    json(analyzePolicy(await readPolicyFile(arguments_[0]))),
+    json(
+      analyzePolicy(
+        await readPolicyFile(workspacePath(arguments_[0]), WORKSPACE_ROOT),
+      ),
+    ),
   );
 }
 
@@ -63,8 +93,15 @@ async function verify(arguments_) {
   if (arguments_.length !== 2 || arguments_.some((item) => item.startsWith("-"))) {
     throw new Error("invalid_arguments");
   }
-  const policy = await readPolicyFile(arguments_[0]);
-  const receipt = await readStrictJsonFile(arguments_[1]);
+  const policy = await readPolicyFile(
+    workspacePath(arguments_[0]),
+    WORKSPACE_ROOT,
+  );
+  const receipt = await readStrictJsonFile(
+    workspacePath(arguments_[1]),
+    undefined,
+    WORKSPACE_ROOT,
+  );
   process.stdout.write(json(verifyReceipt(policy, receipt)));
 }
 

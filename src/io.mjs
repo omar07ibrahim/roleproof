@@ -1,5 +1,6 @@
 import { constants } from "node:fs";
-import { mkdir, open, rm } from "node:fs/promises";
+import { mkdir, open, realpath, rm } from "node:fs/promises";
+import path from "node:path";
 import path from "node:path";
 
 import { parseJsonStrict, StrictJsonError } from "./json.mjs";
@@ -25,7 +26,26 @@ function sameFile(left, right) {
   );
 }
 
-export async function readStrictJsonFile(filePath, maximum = MAX_RECEIPT_BYTES) {
+async function requireDescriptorWithin(handle, allowedRoot) {
+  if (allowedRoot === undefined) return;
+  const root = path.resolve(allowedRoot);
+  let actual;
+  try {
+    actual = await realpath("/proc/self/fd/" + handle.fd);
+  } catch {
+    throw new IoBoundaryError("invalid_input_file");
+  }
+  const prefix = root.endsWith(path.sep) ? root : root + path.sep;
+  if (!actual.startsWith(prefix)) {
+    throw new IoBoundaryError("invalid_input_file");
+  }
+}
+
+export async function readStrictJsonFile(
+  filePath,
+  maximum = MAX_RECEIPT_BYTES,
+  allowedRoot = undefined,
+) {
   if (typeof constants.O_NOFOLLOW !== "number") {
     throw new IoBoundaryError("invalid_input_file");
   }
@@ -44,6 +64,7 @@ export async function readStrictJsonFile(filePath, maximum = MAX_RECEIPT_BYTES) 
   }
   try {
     const opened = await handle.stat({ bigint: true });
+    await requireDescriptorWithin(handle, allowedRoot);
     if (
       !opened.isFile() ||
       opened.isSymbolicLink() ||

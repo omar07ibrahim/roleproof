@@ -1,5 +1,6 @@
 import { constants } from "node:fs";
-import { open } from "node:fs/promises";
+import { open, realpath } from "node:fs/promises";
+import path from "node:path";
 
 import { parseJsonStrict, StrictJsonError } from "./json.mjs";
 
@@ -311,7 +312,20 @@ function sameFile(left, right) {
   );
 }
 
-export async function readPolicyFile(path) {
+async function requireDescriptorWithin(handle, allowedRoot) {
+  if (allowedRoot === undefined) return;
+  const root = path.resolve(allowedRoot);
+  let actual;
+  try {
+    actual = await realpath("/proc/self/fd/" + handle.fd);
+  } catch {
+    fail("invalid_file", "$");
+  }
+  const prefix = root.endsWith(path.sep) ? root : root + path.sep;
+  if (!actual.startsWith(prefix)) fail("invalid_file", "$");
+}
+
+export async function readPolicyFile(filePath, allowedRoot = undefined) {
   if (typeof constants.O_NOFOLLOW !== "number") {
     fail("invalid_file", "$");
   }
@@ -321,12 +335,13 @@ export async function readPolicyFile(path) {
     constants.O_NOFOLLOW;
   let handle;
   try {
-    handle = await open(path, flags);
+    handle = await open(filePath, flags);
   } catch {
     fail("invalid_file", "$");
   }
   try {
     const opened = await handle.stat({ bigint: true });
+    await requireDescriptorWithin(handle, allowedRoot);
     if (
       !opened.isFile() ||
       opened.isSymbolicLink() ||

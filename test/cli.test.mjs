@@ -124,3 +124,17 @@ test("usage and malformed receipts fail without stack traces", async () => {
     await rm(temporary, { recursive: true, force: true });
   }
 });
+
+test("CLI confines file paths to the current workspace", () => {
+  const outside = path.join(os.tmpdir(), "roleproof-outside.json");
+  for (const arguments_ of [
+    ["analyze", outside],
+    ["analyze", "../outside.json"],
+    ["audit", "examples/orion.synthetic.json", "--out", "../bundle"],
+    ["verify", "examples/orion.synthetic.json", outside],
+  ]) {
+    const completed = run(...arguments_);
+    assert.equal(completed.status, 64, arguments_.join(" "));
+    assert.equal(completed.stderr, "roleproof: invalid_arguments\n");
+  }
+});
