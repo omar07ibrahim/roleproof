@@ -15,13 +15,20 @@
     "node": ">=22 <25"
   },
   "files": [
+    "dist",
+    "docs",
+    "examples",
     "src",
+    "tools",
+    "web",
     "README.md",
+    "SECURITY.md",
     "LICENSE"
   ],
   "scripts": {
     "build": "node tools/build-site.mjs",
     "test": "node --test",
-    "check": "npm test && npm audit --omit=dev"
+    "check": "npm test && npm audit --omit=dev",
+    "prepack": "npm run build"
   }
 }

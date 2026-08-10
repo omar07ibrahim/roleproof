@@ -3,28 +3,138 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="Safe retirement boundary for the test2 legacy prototype.">
-  <title>RoleProof · Rebuild in progress</title>
+  <meta name="description" content="Explore independently verified access-policy witnesses from the synthetic RoleProof audit.">
+  <meta name="color-scheme" content="dark">
+  <title>RoleProof · Explainable access review</title>
   <link rel="stylesheet" href="/styles.css">
+  <script type="module" src="/app.js"></script>
 </head>
 <body>
-  <main>
-    <p class="eyebrow">REPOSITORY SAFETY BOUNDARY</p>
-    <h1>Legacy runtime retired.</h1>
-    <p class="lede">
-      The historical CRM prototype is unsupported and no longer ships from the
-      default branch. This static page has no application routes, credentials,
-      forms, analytics, or user data.
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="RoleProof home">
+      <span class="brand-mark" aria-hidden="true">RP</span>
+      <span>RoleProof</span>
+    </a>
+    <p class="status" id="verification-status">
+      <span class="status-dot" aria-hidden="true"></span>
+      Loading proof
     </p>
-    <section aria-labelledby="next-title">
-      <p class="status"><span aria-hidden="true"></span> Safe static boundary</p>
-      <h2 id="next-title">Next: RoleProof</h2>
-      <p>
-        A dependency-free symbolic AI laboratory for bounded access graphs,
-        independently verified escalation witnesses, and reproducible evidence.
+  </header>
+
+  <main>
+    <section class="hero" aria-labelledby="hero-title">
+      <p class="eyebrow">SYMBOLIC AI · ACCESS GRAPH SECURITY</p>
+      <h1 id="hero-title">Trace the permission.<br><span>Prove the finding.</span></h1>
+      <p class="hero-copy">
+        RoleProof turns a bounded RBAC policy into shortest access witnesses,
+        explicit witness cuts, and a receipt checked by an independent
+        transitive-closure implementation.
       </p>
+      <div class="hashes" aria-label="Evidence hashes">
+        <p><span>POLICY</span><code id="policy-hash">loading</code></p>
+        <p><span>RESULT</span><code id="result-hash">loading</code></p>
+      </div>
     </section>
-    <p class="footnote">Historical revisions are retained only for provenance. Do not deploy them.</p>
+
+    <section class="metrics" aria-label="Audit summary">
+      <article>
+        <p>Violations</p>
+        <strong id="metric-violations">—</strong>
+        <span>of <b id="metric-total">—</b> constraints</span>
+      </article>
+      <article class="critical">
+        <p>Critical</p>
+        <strong id="metric-critical">—</strong>
+        <span>verified paths</span>
+      </article>
+      <article>
+        <p>Passes</p>
+        <strong id="metric-passes">—</strong>
+        <span>closed constraints</span>
+      </article>
+      <article>
+        <p>Cycles</p>
+        <strong id="metric-cycles">—</strong>
+        <span>SCC components</span>
+      </article>
+    </section>
+
+    <section class="workspace" aria-label="Constraint explorer">
+      <aside class="finding-panel">
+        <div class="section-heading">
+          <div>
+            <p class="kicker">CONSTRAINTS</p>
+            <h2>Review queue</h2>
+          </div>
+          <p class="counter" id="visible-count">0</p>
+        </div>
+        <div class="filters" role="group" aria-label="Filter findings">
+          <button type="button" data-filter="all" aria-pressed="true">All</button>
+          <button type="button" data-filter="violation" aria-pressed="false">Violations</button>
+          <button type="button" data-filter="pass" aria-pressed="false">Passes</button>
+        </div>
+        <div class="finding-list" id="finding-list" aria-live="polite"></div>
+      </aside>
+
+      <article class="inspector" aria-labelledby="inspector-title">
+        <div class="inspector-head">
+          <div>
+            <p class="kicker" id="inspector-kind">WITNESS</p>
+            <h2 id="inspector-title">Choose a constraint</h2>
+          </div>
+          <span class="severity" id="inspector-severity">—</span>
+        </div>
+        <p class="inspector-summary" id="inspector-summary">
+          The selected constraint's shortest verified path appears here.
+        </p>
+        <div class="witnesses" id="witnesses"></div>
+        <section class="cuts" aria-labelledby="cuts-title">
+          <div>
+            <p class="kicker">REMEDIATION SURFACE</p>
+            <h3 id="cuts-title">Cuts on the chosen witness</h3>
+          </div>
+          <p class="boundary-note">
+            A cut blocks this witness only; another path may still exist.
+          </p>
+          <div class="cut-list" id="cut-list"></div>
+        </section>
+      </article>
+    </section>
+
+    <section class="graph-section" aria-labelledby="graph-title">
+      <div class="section-heading wide">
+        <div>
+          <p class="kicker">SOURCE-DERIVED SVG</p>
+          <h2 id="graph-title">Effective role graph</h2>
+        </div>
+        <p>solid inheritance · dashed assumption</p>
+      </div>
+      <div class="graph-frame">
+        <img src="/data/role-graph.svg" alt="Role graph derived from the synthetic Orion policy">
+      </div>
+    </section>
+
+    <section class="proof-section" aria-labelledby="proof-title">
+      <div>
+        <p class="kicker">INDEPENDENT VERIFICATION</p>
+        <h2 id="proof-title">A second algorithm closes the receipt.</h2>
+        <p>
+          The verifier never imports the analyzer. It reconstructs reachability
+          with Floyd–Warshall, checks finding completeness, validates every edge
+          and grant, proves shortest path length, and rechecks every hash.
+        </p>
+      </div>
+      <ul id="proof-checks" aria-label="Verification checks"></ul>
+    </section>
   </main>
+
+  <footer>
+    <p>Real synthetic evidence · no live IAM connection · no employee data</p>
+    <p>Bounded to 64 roles and a 64 KiB policy contract</p>
+  </footer>
+
+  <div class="fatal" id="fatal" role="alert" hidden>
+    Evidence failed to load. Run npm run build to regenerate the closed bundle.
+  </div>
 </body>
 </html>
