@@ -1,0 +1,958 @@
+{
+  "format": "roleproof.receipt.v1",
+  "policy_sha256": "f022e5ebe24dd5f7995b08b5aea3d3785bc9a9f98d7b8d4f0b4e4155c28c157a",
+  "result": {
+    "cycles": [],
+    "engine": {
+      "algorithm": "bounded-bfs-shortest-then-lexicographic",
+      "name": "RoleProof",
+      "version": "0.1.0"
+    },
+    "findings": [
+      {
+        "constraint_id": "approver-no-request",
+        "kind": "separation_of_duties",
+        "principal": "carol-approver",
+        "roles": [
+          "approver",
+          "requester"
+        ],
+        "severity": "high",
+        "status": "violation",
+        "witness_cuts": [
+          {
+            "from_role": "approver",
+            "kind": "remove_inheritance",
+            "scope": "chosen_witness_only",
+            "to_role": "requester"
+          },
+          {
+            "kind": "remove_assignment",
+            "principal": "carol-approver",
+            "role": "approver",
+            "scope": "chosen_witness_only"
+          }
+        ],
+        "witnesses": [
+          {
+            "assignment": {
+              "principal": "carol-approver",
+              "role": "approver"
+            },
+            "reached_role": "approver",
+            "steps": []
+          },
+          {
+            "assignment": {
+              "principal": "carol-approver",
+              "role": "approver"
+            },
+            "reached_role": "requester",
+            "steps": [
+              {
+                "from": "approver",
+                "kind": "inherits",
+                "to": "requester"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "action": "admin",
+        "constraint_id": "builder-no-prod-admin",
+        "kind": "deny_access",
+        "principal": "bob-builder",
+        "resource": "production",
+        "severity": "critical",
+        "status": "violation",
+        "witness_cuts": [
+          {
+            "action": "admin",
+            "kind": "remove_grant",
+            "resource": "production",
+            "role": "prod-admin",
+            "scope": "chosen_witness_only"
+          },
+          {
+            "from_role": "developer",
+            "kind": "remove_assumption",
+            "scope": "chosen_witness_only",
+            "to_role": "release-manager"
+          },
+          {
+            "from_role": "release-manager",
+            "kind": "remove_assumption",
+            "scope": "chosen_witness_only",
+            "to_role": "prod-admin"
+          },
+          {
+            "kind": "remove_assignment",
+            "principal": "bob-builder",
+            "role": "developer",
+            "scope": "chosen_witness_only"
+          }
+        ],
+        "witnesses": [
+          {
+            "assignment": {
+              "principal": "bob-builder",
+              "role": "developer"
+            },
+            "grant": {
+              "action": "admin",
+              "resource": "production",
+              "role": "prod-admin"
+            },
+            "steps": [
+              {
+                "from": "developer",
+                "kind": "can_assume",
+                "to": "release-manager"
+              },
+              {
+                "from": "release-manager",
+                "kind": "can_assume",
+                "to": "prod-admin"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "action": "read",
+        "constraint_id": "intern-no-payroll",
+        "kind": "deny_access",
+        "principal": "alice-intern",
+        "resource": "payroll-ledger",
+        "severity": "critical",
+        "status": "violation",
+        "witness_cuts": [
+          {
+            "action": "read",
+            "kind": "remove_grant",
+            "resource": "payroll-ledger",
+            "role": "prod-admin",
+            "scope": "chosen_witness_only"
+          },
+          {
+            "from_role": "contractor",
+            "kind": "remove_assumption",
+            "scope": "chosen_witness_only",
+            "to_role": "developer"
+          },
+          {
+            "from_role": "developer",
+            "kind": "remove_assumption",
+            "scope": "chosen_witness_only",
+            "to_role": "release-manager"
+          },
+          {
+            "from_role": "intern",
+            "kind": "remove_assumption",
+            "scope": "chosen_witness_only",
+            "to_role": "contractor"
+          },
+          {
+            "from_role": "release-manager",
+            "kind": "remove_assumption",
+            "scope": "chosen_witness_only",
+            "to_role": "prod-admin"
+          },
+          {
+            "kind": "remove_assignment",
+            "principal": "alice-intern",
+            "role": "intern",
+            "scope": "chosen_witness_only"
+          }
+        ],
+        "witnesses": [
+          {
+            "assignment": {
+              "principal": "alice-intern",
+              "role": "intern"
+            },
+            "grant": {
+              "action": "read",
+              "resource": "payroll-ledger",
+              "role": "prod-admin"
+            },
+            "steps": [
+              {
+                "from": "intern",
+                "kind": "can_assume",
+                "to": "contractor"
+              },
+              {
+                "from": "contractor",
+                "kind": "can_assume",
+                "to": "developer"
+              },
+              {
+                "from": "developer",
+                "kind": "can_assume",
+                "to": "release-manager"
+              },
+              {
+                "from": "release-manager",
+                "kind": "can_assume",
+                "to": "prod-admin"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "action": "deploy",
+        "constraint_id": "intern-no-prod-deploy",
+        "kind": "deny_access",
+        "principal": "alice-intern",
+        "resource": "production",
+        "severity": "critical",
+        "status": "violation",
+        "witness_cuts": [
+          {
+            "action": "deploy",
+            "kind": "remove_grant",
+            "resource": "production",
+            "role": "prod-admin",
+            "scope": "chosen_witness_only"
+          },
+          {
+            "from_role": "contractor",
+            "kind": "remove_assumption",
+            "scope": "chosen_witness_only",
+            "to_role": "developer"
+          },
+          {
+            "from_role": "developer",
+            "kind": "remove_assumption",
+            "scope": "chosen_witness_only",
+            "to_role": "release-manager"
+          },
+          {
+            "from_role": "intern",
+            "kind": "remove_assumption",
+            "scope": "chosen_witness_only",
+            "to_role": "contractor"
+          },
+          {
+            "from_role": "release-manager",
+            "kind": "remove_assumption",
+            "scope": "chosen_witness_only",
+            "to_role": "prod-admin"
+          },
+          {
+            "kind": "remove_assignment",
+            "principal": "alice-intern",
+            "role": "intern",
+            "scope": "chosen_witness_only"
+          }
+        ],
+        "witnesses": [
+          {
+            "assignment": {
+              "principal": "alice-intern",
+              "role": "intern"
+            },
+            "grant": {
+              "action": "deploy",
+              "resource": "production",
+              "role": "prod-admin"
+            },
+            "steps": [
+              {
+                "from": "intern",
+                "kind": "can_assume",
+                "to": "contractor"
+              },
+              {
+                "from": "contractor",
+                "kind": "can_assume",
+                "to": "developer"
+              },
+              {
+                "from": "developer",
+                "kind": "can_assume",
+                "to": "release-manager"
+              },
+              {
+                "from": "release-manager",
+                "kind": "can_assume",
+                "to": "prod-admin"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "action": "deploy",
+        "constraint_id": "payroll-no-prod-deploy",
+        "kind": "deny_access",
+        "principal": "dave-payroll",
+        "resource": "production",
+        "severity": "high",
+        "status": "pass",
+        "witness_cuts": [],
+        "witnesses": []
+      }
+    ],
+    "format": "roleproof.analysis.v1",
+    "policy": {
+      "constraints": 5,
+      "principals": 4,
+      "resources": 4,
+      "roles": 10,
+      "sha256": "f022e5ebe24dd5f7995b08b5aea3d3785bc9a9f98d7b8d4f0b4e4155c28c157a",
+      "title": "Orion Cloud synthetic access review"
+    },
+    "principals": [
+      {
+        "assigned_roles": [
+          "intern"
+        ],
+        "effective_grants": [
+          {
+            "action": "read",
+            "resource": "build-registry",
+            "via_role": "ci-operator",
+            "witness": {
+              "assignment": {
+                "principal": "alice-intern",
+                "role": "intern"
+              },
+              "grant": {
+                "action": "read",
+                "resource": "build-registry",
+                "role": "ci-operator"
+              },
+              "steps": [
+                {
+                  "from": "intern",
+                  "kind": "can_assume",
+                  "to": "contractor"
+                },
+                {
+                  "from": "contractor",
+                  "kind": "can_assume",
+                  "to": "developer"
+                },
+                {
+                  "from": "developer",
+                  "kind": "inherits",
+                  "to": "ci-operator"
+                }
+              ]
+            }
+          },
+          {
+            "action": "write",
+            "resource": "build-registry",
+            "via_role": "developer",
+            "witness": {
+              "assignment": {
+                "principal": "alice-intern",
+                "role": "intern"
+              },
+              "grant": {
+                "action": "write",
+                "resource": "build-registry",
+                "role": "developer"
+              },
+              "steps": [
+                {
+                  "from": "intern",
+                  "kind": "can_assume",
+                  "to": "contractor"
+                },
+                {
+                  "from": "contractor",
+                  "kind": "can_assume",
+                  "to": "developer"
+                }
+              ]
+            }
+          },
+          {
+            "action": "read",
+            "resource": "payroll-ledger",
+            "via_role": "prod-admin",
+            "witness": {
+              "assignment": {
+                "principal": "alice-intern",
+                "role": "intern"
+              },
+              "grant": {
+                "action": "read",
+                "resource": "payroll-ledger",
+                "role": "prod-admin"
+              },
+              "steps": [
+                {
+                  "from": "intern",
+                  "kind": "can_assume",
+                  "to": "contractor"
+                },
+                {
+                  "from": "contractor",
+                  "kind": "can_assume",
+                  "to": "developer"
+                },
+                {
+                  "from": "developer",
+                  "kind": "can_assume",
+                  "to": "release-manager"
+                },
+                {
+                  "from": "release-manager",
+                  "kind": "can_assume",
+                  "to": "prod-admin"
+                }
+              ]
+            }
+          },
+          {
+            "action": "admin",
+            "resource": "production",
+            "via_role": "prod-admin",
+            "witness": {
+              "assignment": {
+                "principal": "alice-intern",
+                "role": "intern"
+              },
+              "grant": {
+                "action": "admin",
+                "resource": "production",
+                "role": "prod-admin"
+              },
+              "steps": [
+                {
+                  "from": "intern",
+                  "kind": "can_assume",
+                  "to": "contractor"
+                },
+                {
+                  "from": "contractor",
+                  "kind": "can_assume",
+                  "to": "developer"
+                },
+                {
+                  "from": "developer",
+                  "kind": "can_assume",
+                  "to": "release-manager"
+                },
+                {
+                  "from": "release-manager",
+                  "kind": "can_assume",
+                  "to": "prod-admin"
+                }
+              ]
+            }
+          },
+          {
+            "action": "deploy",
+            "resource": "production",
+            "via_role": "prod-admin",
+            "witness": {
+              "assignment": {
+                "principal": "alice-intern",
+                "role": "intern"
+              },
+              "grant": {
+                "action": "deploy",
+                "resource": "production",
+                "role": "prod-admin"
+              },
+              "steps": [
+                {
+                  "from": "intern",
+                  "kind": "can_assume",
+                  "to": "contractor"
+                },
+                {
+                  "from": "contractor",
+                  "kind": "can_assume",
+                  "to": "developer"
+                },
+                {
+                  "from": "developer",
+                  "kind": "can_assume",
+                  "to": "release-manager"
+                },
+                {
+                  "from": "release-manager",
+                  "kind": "can_assume",
+                  "to": "prod-admin"
+                }
+              ]
+            }
+          },
+          {
+            "action": "read",
+            "resource": "support-console",
+            "via_role": "support-reader",
+            "witness": {
+              "assignment": {
+                "principal": "alice-intern",
+                "role": "intern"
+              },
+              "grant": {
+                "action": "read",
+                "resource": "support-console",
+                "role": "support-reader"
+              },
+              "steps": [
+                {
+                  "from": "intern",
+                  "kind": "inherits",
+                  "to": "support-reader"
+                }
+              ]
+            }
+          }
+        ],
+        "effective_roles": [
+          {
+            "role": "ci-operator",
+            "witness": {
+              "assignment": {
+                "principal": "alice-intern",
+                "role": "intern"
+              },
+              "reached_role": "ci-operator",
+              "steps": [
+                {
+                  "from": "intern",
+                  "kind": "can_assume",
+                  "to": "contractor"
+                },
+                {
+                  "from": "contractor",
+                  "kind": "can_assume",
+                  "to": "developer"
+                },
+                {
+                  "from": "developer",
+                  "kind": "inherits",
+                  "to": "ci-operator"
+                }
+              ]
+            }
+          },
+          {
+            "role": "contractor",
+            "witness": {
+              "assignment": {
+                "principal": "alice-intern",
+                "role": "intern"
+              },
+              "reached_role": "contractor",
+              "steps": [
+                {
+                  "from": "intern",
+                  "kind": "can_assume",
+                  "to": "contractor"
+                }
+              ]
+            }
+          },
+          {
+            "role": "developer",
+            "witness": {
+              "assignment": {
+                "principal": "alice-intern",
+                "role": "intern"
+              },
+              "reached_role": "developer",
+              "steps": [
+                {
+                  "from": "intern",
+                  "kind": "can_assume",
+                  "to": "contractor"
+                },
+                {
+                  "from": "contractor",
+                  "kind": "can_assume",
+                  "to": "developer"
+                }
+              ]
+            }
+          },
+          {
+            "role": "intern",
+            "witness": {
+              "assignment": {
+                "principal": "alice-intern",
+                "role": "intern"
+              },
+              "reached_role": "intern",
+              "steps": []
+            }
+          },
+          {
+            "role": "prod-admin",
+            "witness": {
+              "assignment": {
+                "principal": "alice-intern",
+                "role": "intern"
+              },
+              "reached_role": "prod-admin",
+              "steps": [
+                {
+                  "from": "intern",
+                  "kind": "can_assume",
+                  "to": "contractor"
+                },
+                {
+                  "from": "contractor",
+                  "kind": "can_assume",
+                  "to": "developer"
+                },
+                {
+                  "from": "developer",
+                  "kind": "can_assume",
+                  "to": "release-manager"
+                },
+                {
+                  "from": "release-manager",
+                  "kind": "can_assume",
+                  "to": "prod-admin"
+                }
+              ]
+            }
+          },
+          {
+            "role": "release-manager",
+            "witness": {
+              "assignment": {
+                "principal": "alice-intern",
+                "role": "intern"
+              },
+              "reached_role": "release-manager",
+              "steps": [
+                {
+                  "from": "intern",
+                  "kind": "can_assume",
+                  "to": "contractor"
+                },
+                {
+                  "from": "contractor",
+                  "kind": "can_assume",
+                  "to": "developer"
+                },
+                {
+                  "from": "developer",
+                  "kind": "can_assume",
+                  "to": "release-manager"
+                }
+              ]
+            }
+          },
+          {
+            "role": "support-reader",
+            "witness": {
+              "assignment": {
+                "principal": "alice-intern",
+                "role": "intern"
+              },
+              "reached_role": "support-reader",
+              "steps": [
+                {
+                  "from": "intern",
+                  "kind": "inherits",
+                  "to": "support-reader"
+                }
+              ]
+            }
+          }
+        ],
+        "id": "alice-intern"
+      },
+      {
+        "assigned_roles": [
+          "developer"
+        ],
+        "effective_grants": [
+          {
+            "action": "read",
+            "resource": "build-registry",
+            "via_role": "ci-operator",
+            "witness": {
+              "assignment": {
+                "principal": "bob-builder",
+                "role": "developer"
+              },
+              "grant": {
+                "action": "read",
+                "resource": "build-registry",
+                "role": "ci-operator"
+              },
+              "steps": [
+                {
+                  "from": "developer",
+                  "kind": "inherits",
+                  "to": "ci-operator"
+                }
+              ]
+            }
+          },
+          {
+            "action": "write",
+            "resource": "build-registry",
+            "via_role": "developer",
+            "witness": {
+              "assignment": {
+                "principal": "bob-builder",
+                "role": "developer"
+              },
+              "grant": {
+                "action": "write",
+                "resource": "build-registry",
+                "role": "developer"
+              },
+              "steps": []
+            }
+          },
+          {
+            "action": "read",
+            "resource": "payroll-ledger",
+            "via_role": "prod-admin",
+            "witness": {
+              "assignment": {
+                "principal": "bob-builder",
+                "role": "developer"
+              },
+              "grant": {
+                "action": "read",
+                "resource": "payroll-ledger",
+                "role": "prod-admin"
+              },
+              "steps": [
+                {
+                  "from": "developer",
+                  "kind": "can_assume",
+                  "to": "release-manager"
+                },
+                {
+                  "from": "release-manager",
+                  "kind": "can_assume",
+                  "to": "prod-admin"
+                }
+              ]
+            }
+          },
+          {
+            "action": "admin",
+            "resource": "production",
+            "via_role": "prod-admin",
+            "witness": {
+              "assignment": {
+                "principal": "bob-builder",
+                "role": "developer"
+              },
+              "grant": {
+                "action": "admin",
+                "resource": "production",
+                "role": "prod-admin"
+              },
+              "steps": [
+                {
+                  "from": "developer",
+                  "kind": "can_assume",
+                  "to": "release-manager"
+                },
+                {
+                  "from": "release-manager",
+                  "kind": "can_assume",
+                  "to": "prod-admin"
+                }
+              ]
+            }
+          },
+          {
+            "action": "deploy",
+            "resource": "production",
+            "via_role": "prod-admin",
+            "witness": {
+              "assignment": {
+                "principal": "bob-builder",
+                "role": "developer"
+              },
+              "grant": {
+                "action": "deploy",
+                "resource": "production",
+                "role": "prod-admin"
+              },
+              "steps": [
+                {
+                  "from": "developer",
+                  "kind": "can_assume",
+                  "to": "release-manager"
+                },
+                {
+                  "from": "release-manager",
+                  "kind": "can_assume",
+                  "to": "prod-admin"
+                }
+              ]
+            }
+          }
+        ],
+        "effective_roles": [
+          {
+            "role": "ci-operator",
+            "witness": {
+              "assignment": {
+                "principal": "bob-builder",
+                "role": "developer"
+              },
+              "reached_role": "ci-operator",
+              "steps": [
+                {
+                  "from": "developer",
+                  "kind": "inherits",
+                  "to": "ci-operator"
+                }
+              ]
+            }
+          },
+          {
+            "role": "developer",
+            "witness": {
+              "assignment": {
+                "principal": "bob-builder",
+                "role": "developer"
+              },
+              "reached_role": "developer",
+              "steps": []
+            }
+          },
+          {
+            "role": "prod-admin",
+            "witness": {
+              "assignment": {
+                "principal": "bob-builder",
+                "role": "developer"
+              },
+              "reached_role": "prod-admin",
+              "steps": [
+                {
+                  "from": "developer",
+                  "kind": "can_assume",
+                  "to": "release-manager"
+                },
+                {
+                  "from": "release-manager",
+                  "kind": "can_assume",
+                  "to": "prod-admin"
+                }
+              ]
+            }
+          },
+          {
+            "role": "release-manager",
+            "witness": {
+              "assignment": {
+                "principal": "bob-builder",
+                "role": "developer"
+              },
+              "reached_role": "release-manager",
+              "steps": [
+                {
+                  "from": "developer",
+                  "kind": "can_assume",
+                  "to": "release-manager"
+                }
+              ]
+            }
+          }
+        ],
+        "id": "bob-builder"
+      },
+      {
+        "assigned_roles": [
+          "approver"
+        ],
+        "effective_grants": [],
+        "effective_roles": [
+          {
+            "role": "approver",
+            "witness": {
+              "assignment": {
+                "principal": "carol-approver",
+                "role": "approver"
+              },
+              "reached_role": "approver",
+              "steps": []
+            }
+          },
+          {
+            "role": "requester",
+            "witness": {
+              "assignment": {
+                "principal": "carol-approver",
+                "role": "approver"
+              },
+              "reached_role": "requester",
+              "steps": [
+                {
+                  "from": "approver",
+                  "kind": "inherits",
+                  "to": "requester"
+                }
+              ]
+            }
+          }
+        ],
+        "id": "carol-approver"
+      },
+      {
+        "assigned_roles": [
+          "payroll-analyst"
+        ],
+        "effective_grants": [
+          {
+            "action": "read",
+            "resource": "payroll-ledger",
+            "via_role": "payroll-analyst",
+            "witness": {
+              "assignment": {
+                "principal": "dave-payroll",
+                "role": "payroll-analyst"
+              },
+              "grant": {
+                "action": "read",
+                "resource": "payroll-ledger",
+                "role": "payroll-analyst"
+              },
+              "steps": []
+            }
+          }
+        ],
+        "effective_roles": [
+          {
+            "role": "payroll-analyst",
+            "witness": {
+              "assignment": {
+                "principal": "dave-payroll",
+                "role": "payroll-analyst"
+              },
+              "reached_role": "payroll-analyst",
+              "steps": []
+            }
+          }
+        ],
+        "id": "dave-payroll"
+      }
+    ],
+    "summary": {
+      "critical_violations": 3,
+      "cycle_components": 0,
+      "high_violations": 1,
+      "passes": 1,
+      "total_constraints": 5,
+      "violations": 4
+    }
+  },
+  "result_sha256": "10d2ba62b719bf2c7aa7490efd6a6a466c1c2aa345dcde24f6cc098de50f0abf"
+}

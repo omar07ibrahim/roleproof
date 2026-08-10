@@ -1,0 +1,10 @@
+ROLEPROOF AUDIT VERIFIED
+Policy      f022e5ebe24dd5f7995b08b5aea3d3785bc9a9f98d7b8d4f0b4e4155c28c157a
+Result      10d2ba62b719bf2c7aa7490efd6a6a466c1c2aa345dcde24f6cc098de50f0abf
+Constraints 5
+Violations  4
+Critical    3
+High        1
+Passes      1
+Cycles      0
+Bundle      roleproof-audit

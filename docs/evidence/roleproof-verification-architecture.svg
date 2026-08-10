@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1260 540" role="img" aria-labelledby="t d">
+<title id="t">RoleProof verification architecture</title>
+<desc id="d">The analyzer and verifier independently consume the normalized policy before the closed bundle reaches the dashboard.</desc>
+<rect width="1260" height="540" rx="28" fill="#07111f"/>
+<text x="64" y="68" fill="#65e5ca" font-family="ui-monospace,monospace" font-size="14" font-weight="700" letter-spacing="2">ROLEPROOF · VERIFICATION ARCHITECTURE</text>
+<text x="64" y="116" fill="#f4f8ff" font-family="ui-sans-serif,system-ui" font-size="34" font-weight="750">Two algorithms. One closed receipt.</text>
+<path d="M280 238 C315 238 315 149 350 149" fill="none" stroke="#70b7ff" stroke-width="3"/>
+<path d="M280 270 C315 270 315 359 350 359" fill="none" stroke="#ffbf69" stroke-width="3"/>
+<path d="M580 149 C620 149 610 238 650 238" fill="none" stroke="#70b7ff" stroke-width="3"/>
+<path d="M580 359 C620 359 610 270 650 270" fill="none" stroke="#ffbf69" stroke-width="3"/>
+<path d="M880 254 L950 254" fill="none" stroke="#c59cff" stroke-width="3"/>
+<g transform="translate(70 210)"><rect width="210" height="88" rx="15" fill="#0d2034" stroke="#58dfc2" stroke-width="2"/><text x="18" y="35" fill="#f4f8ff" font-family="ui-sans-serif,system-ui" font-size="18" font-weight="700">Strict policy</text><text x="18" y="61" fill="#91a8c1" font-family="ui-monospace,monospace" font-size="12">src/contracts.mjs</text></g>
+<g transform="translate(350 105)"><rect width="230" height="88" rx="15" fill="#0d2034" stroke="#70b7ff" stroke-width="2"/><text x="18" y="35" fill="#f4f8ff" font-family="ui-sans-serif,system-ui" font-size="18" font-weight="700">Analyzer</text><text x="18" y="61" fill="#91a8c1" font-family="ui-monospace,monospace" font-size="12">bounded BFS</text></g>
+<g transform="translate(350 315)"><rect width="230" height="88" rx="15" fill="#0d2034" stroke="#ffbf69" stroke-width="2"/><text x="18" y="35" fill="#f4f8ff" font-family="ui-sans-serif,system-ui" font-size="18" font-weight="700">Verifier</text><text x="18" y="61" fill="#91a8c1" font-family="ui-monospace,monospace" font-size="12">Floyd-Warshall</text></g>
+<g transform="translate(650 210)"><rect width="230" height="88" rx="15" fill="#0d2034" stroke="#c59cff" stroke-width="2"/><text x="18" y="35" fill="#f4f8ff" font-family="ui-sans-serif,system-ui" font-size="18" font-weight="700">Proof bundle</text><text x="18" y="61" fill="#91a8c1" font-family="ui-monospace,monospace" font-size="12">src/bundle.mjs</text></g>
+<g transform="translate(950 210)"><rect width="230" height="88" rx="15" fill="#0d2034" stroke="#ff8298" stroke-width="2"/><text x="18" y="35" fill="#f4f8ff" font-family="ui-sans-serif,system-ui" font-size="18" font-weight="700">Dashboard</text><text x="18" y="61" fill="#91a8c1" font-family="ui-monospace,monospace" font-size="12">web/app.js</text></g>
+<text x="350" y="442" fill="#7890aa" font-family="ui-sans-serif,system-ui" font-size="14">No analyzer import</text>
+<text x="350" y="466" fill="#7890aa" font-family="ui-sans-serif,system-ui" font-size="14">Independent closure + witness checks</text>
+<text x="64" y="504" fill="#667f99" font-family="ui-monospace,monospace" font-size="12">Validated modules: 5 · dependency-free runtime</text>
+</svg>

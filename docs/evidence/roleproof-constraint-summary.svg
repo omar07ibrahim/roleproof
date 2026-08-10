@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 470" role="img" aria-labelledby="t d">
+<title id="t">RoleProof constraint results</title>
+<desc id="d">4 of 5 synthetic constraints violate the declared policy, including 3 critical violations.</desc>
+<rect width="1120" height="470" rx="28" fill="#07111f"/>
+<text x="64" y="66" fill="#65e5ca" font-family="ui-monospace,monospace" font-size="14" font-weight="700" letter-spacing="2">EXACT SYNTHETIC RESULT</text>
+<text x="64" y="118" fill="#f4f8ff" font-family="ui-sans-serif,system-ui" font-size="34" font-weight="750">Constraint closure at a glance</text>
+<rect x="64" y="176" width="704" height="52" rx="12" fill="#ff718c"/>
+<rect x="768" y="176" width="176" height="52" rx="12" fill="#72e39b"/>
+<text x="64" y="280" fill="#ff9daf" font-family="ui-sans-serif,system-ui" font-size="54" font-weight="780">4</text>
+<text x="112" y="276" fill="#9cafc5" font-family="ui-sans-serif,system-ui" font-size="15">verified violations</text>
+<text x="410" y="280" fill="#ffbd69" font-family="ui-sans-serif,system-ui" font-size="54" font-weight="780">3</text>
+<text x="458" y="276" fill="#9cafc5" font-family="ui-sans-serif,system-ui" font-size="15">critical paths</text>
+<text x="746" y="280" fill="#82e8a5" font-family="ui-sans-serif,system-ui" font-size="54" font-weight="780">1</text>
+<text x="792" y="276" fill="#9cafc5" font-family="ui-sans-serif,system-ui" font-size="15">closed constraint</text>
+<line x1="64" y1="338" x2="1056" y2="338" stroke="#27425f"/>
+<text x="64" y="382" fill="#8098b2" font-family="ui-monospace,monospace" font-size="13">policy f022e5ebe24dd5f7 · result 10d2ba62b719bf2c</text>
+<text x="64" y="414" fill="#607892" font-family="ui-sans-serif,system-ui" font-size="13">Synthetic Orion fixture · not a benchmark or live IAM attestation</text>
+</svg>

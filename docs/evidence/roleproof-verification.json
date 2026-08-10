@@ -1,0 +1,15 @@
+{
+  "checks": {
+    "cycle_components": true,
+    "finding_completeness": true,
+    "hash_binding": true,
+    "principal_closure": true,
+    "shortest_witnesses": true,
+    "witness_cuts": true
+  },
+  "constraint_status_sha256": "b0828067c208005fa151f88568fab011515396dc1f8deb4fac10e6e329119ff5",
+  "format": "roleproof.verification.v1",
+  "policy_sha256": "f022e5ebe24dd5f7995b08b5aea3d3785bc9a9f98d7b8d4f0b4e4155c28c157a",
+  "result_sha256": "10d2ba62b719bf2c7aa7490efd6a6a466c1c2aa345dcde24f6cc098de50f0abf",
+  "status": "verified"
+}

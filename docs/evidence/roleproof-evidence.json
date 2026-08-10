@@ -1,0 +1,205 @@
+{
+  "capture": {
+    "browser": "Chromium 151.0.7922.34",
+    "container_image": "mcr.microsoft.com/playwright/python@sha256:51d31fdfacb0cff99a1a724152e34ae408d2bd4e7da310ff157450f49261cc59",
+    "gif_frames": 4,
+    "pillow": "12.3.0",
+    "playwright": "1.62.0",
+    "routes": [
+      "/",
+      "/data/analysis.receipt.json"
+    ],
+    "viewports": [
+      "1440x1000",
+      "390x844",
+      "1180x640"
+    ]
+  },
+  "claim_boundary": {
+    "contains_live_iam_data": false,
+    "is_benchmark": false,
+    "is_provider_attestation": false,
+    "scenario": "synthetic Orion policy"
+  },
+  "files": [
+    {
+      "bytes": 26735,
+      "media_type": "application/json",
+      "path": "docs/evidence/roleproof-analysis.json",
+      "sha256": "9e737a0d6c80f5af0951475fd74742fa4e7dfeb124ee03f2f63652afcc15b958"
+    },
+    {
+      "bytes": 40125,
+      "media_type": "image/png",
+      "path": "docs/evidence/roleproof-cli.png",
+      "sha256": "37ae115ba901586af67fa06be1b8d1695a12f86ab8a8aa42be4a9f05b6a9ac09"
+    },
+    {
+      "bytes": 291,
+      "media_type": "text/plain",
+      "path": "docs/evidence/roleproof-cli.txt",
+      "sha256": "15fc757be65a62ab59345ff8a8c64eaf4c20b7bac1aebd4ba4b4a8c50002a234"
+    },
+    {
+      "bytes": 1866,
+      "media_type": "image/svg+xml",
+      "path": "docs/evidence/roleproof-constraint-summary.svg",
+      "sha256": "bfba73eb567fbd8687fbccd54d6c9230d8f4606d105972adb24372b9f389e3d2"
+    },
+    {
+      "bytes": 289807,
+      "media_type": "image/png",
+      "path": "docs/evidence/roleproof-dashboard.png",
+      "sha256": "9da145a3e47322c6a76c595e9f53417ed08d3afeac7e9ba370eb2b43c5a7e289"
+    },
+    {
+      "bytes": 548657,
+      "media_type": "image/png",
+      "path": "docs/evidence/roleproof-full-page.png",
+      "sha256": "ba94ae3bd849bcef0013985ce835b4fde074d61de589373ed87eaea55a2169e0"
+    },
+    {
+      "bytes": 194513,
+      "media_type": "image/gif",
+      "path": "docs/evidence/roleproof-interaction.gif",
+      "sha256": "3a1b3de625bcd0a34645df71fcc0b1c0af12ab157094cab70111394bd49d7d28"
+    },
+    {
+      "bytes": 150847,
+      "media_type": "image/png",
+      "path": "docs/evidence/roleproof-mobile.png",
+      "sha256": "034432677cce5f3ae3341df46dda6a5de2fa114ada6cc7e979ca50d7f8580ab0"
+    },
+    {
+      "bytes": 7598,
+      "media_type": "image/svg+xml",
+      "path": "docs/evidence/roleproof-role-graph.svg",
+      "sha256": "2e0c6831015f9041486e3066ae5f3bc6446300666b65c7312105ecf6a6f08412"
+    },
+    {
+      "bytes": 3338,
+      "media_type": "image/svg+xml",
+      "path": "docs/evidence/roleproof-verification-architecture.svg",
+      "sha256": "be318338f597a26db8398d61d4b3b0d74acdca40d4a4a95d810437c05e0e5552"
+    },
+    {
+      "bytes": 537,
+      "media_type": "application/json",
+      "path": "docs/evidence/roleproof-verification.json",
+      "sha256": "3a6b92c6e9bb6da511d9f4c0204b035146bdd56b3a869601d235d255952aad9a"
+    }
+  ],
+  "format": "roleproof.evidence.v1",
+  "policy_sha256": "f022e5ebe24dd5f7995b08b5aea3d3785bc9a9f98d7b8d4f0b4e4155c28c157a",
+  "result_sha256": "10d2ba62b719bf2c7aa7490efd6a6a466c1c2aa345dcde24f6cc098de50f0abf",
+  "source_revision": "a5f4c510a84e7b130d9c0fec177d91fde5a601c2",
+  "source_tree": "527ada916f07a1652cb9d36ffe4043fff81927f2",
+  "sources": [
+    {
+      "bytes": 2584,
+      "path": "examples/orion.synthetic.json",
+      "sha256": "ce98e211c7f76f3f9bb41c58b54187a191704d669b4ecac97c9ad27a4278c5cd"
+    },
+    {
+      "bytes": 319,
+      "path": "package-lock.json",
+      "sha256": "250e8432a38902d4f944474db839ae39c35978cb1584b8278b613f07ed23f8dd"
+    },
+    {
+      "bytes": 673,
+      "path": "package.json",
+      "sha256": "4c078ed323fbcaa76c20ac5d01fe9e1a441f1e2424903379fb1036c1ff21c2fe"
+    },
+    {
+      "bytes": 394,
+      "path": "requirements/evidence-browser-image.lock.json",
+      "sha256": "1ba302dec7680863dcc3340ea8a129413c738c66b7f8bb0a4d95421bcf9e4c0f"
+    },
+    {
+      "bytes": 690,
+      "path": "requirements/evidence-browser.txt",
+      "sha256": "1f57d9797e65a2a1eb871df83b511bd358c7bc7f0bbb5803544adde5f6730c2c"
+    },
+    {
+      "bytes": 9076,
+      "path": "src/analyze.mjs",
+      "sha256": "0772a6f9dcdb05ac3253ec1eaa2c3220bbcff59a3aa9eef332b29bdbcf676558"
+    },
+    {
+      "bytes": 422,
+      "path": "src/api.mjs",
+      "sha256": "f020fbff85a769796d17892b9aebac9ea30d4597b8a929b9998d0a8ee66feff8"
+    },
+    {
+      "bytes": 1404,
+      "path": "src/bundle.mjs",
+      "sha256": "c1ffc574f384cb0807a1e2d7cfaa79beeed20a368bfa197ab9276657a8575abd"
+    },
+    {
+      "bytes": 1477,
+      "path": "src/canonical.mjs",
+      "sha256": "e426032a0d70f2e4794bbb1c00ec7aadc8a9fefbb8016d139c1b4834326911d4"
+    },
+    {
+      "bytes": 3224,
+      "path": "src/cli.mjs",
+      "sha256": "4e2bf535ce9afdc8ff4e63ca27c313e84e2920f4ce18a42543c4266ef08c97c3"
+    },
+    {
+      "bytes": 9594,
+      "path": "src/contracts.mjs",
+      "sha256": "ac2bdf2b8d514bed6a25549aca24cd20a133c57e72f3ddebf8067d224bf8df1f"
+    },
+    {
+      "bytes": 3811,
+      "path": "src/io.mjs",
+      "sha256": "bb3fc6e77f56f5c5eb9ddc0d958229d03124abbe3da8ef946805481d6ade8f8e"
+    },
+    {
+      "bytes": 4193,
+      "path": "src/json.mjs",
+      "sha256": "f727191ee9d9269547c2bc765a1826198a7084ef2366c3ae85c714d9d42391d7"
+    },
+    {
+      "bytes": 6798,
+      "path": "src/render-svg.mjs",
+      "sha256": "472c6b51b9c82b35e9d72df32aad99cf5718d6599187770f159b7a81c3bd976b"
+    },
+    {
+      "bytes": 5989,
+      "path": "src/server.mjs",
+      "sha256": "3b3b7a22c556be47f66090dedb31c15b46b999aed79b64f067b352be4ae111a3"
+    },
+    {
+      "bytes": 15747,
+      "path": "src/verify.mjs",
+      "sha256": "abbc681b2afde58fc43b6e10f2ccf38711ed6364dce83816dd66874a5e75fdbb"
+    },
+    {
+      "bytes": 2620,
+      "path": "tools/build-site.mjs",
+      "sha256": "7b60f284986589a33c57166e1bd100e2e7e98aefbc182a5d83a04389ae60a420"
+    },
+    {
+      "bytes": 26434,
+      "path": "tools/capture_evidence.py",
+      "sha256": "99ae31f2944eacdc28fc5b033eb22a3ac02fa8edb46b7012096595c0c7ae15a2"
+    },
+    {
+      "bytes": 7423,
+      "path": "web/app.js",
+      "sha256": "c5edb658aa307a77cf7a86f453dbdf050a2f580c69b07164c7f222087ae030c7"
+    },
+    {
+      "bytes": 5297,
+      "path": "web/index.html",
+      "sha256": "4c79b8c47a9aeee2c515a9c452a9ee0cf49a4bedaa0ae298b1d433100b67eaf3"
+    },
+    {
+      "bytes": 10604,
+      "path": "web/styles.css",
+      "sha256": "8c1ce51a73309b300e7604a6d73f4dbc8f9b481cd92760d6444b4676c26a5a19"
+    }
+  ],
+  "verification_sha256": "b4cffada035b96863a1cbb4c4f602085b7bbb2cb8884bee99d0b8a30d37ead34"
+}

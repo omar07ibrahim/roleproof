@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 820" role="img" aria-labelledby="title description">
+<title id="title">RoleProof effective role graph</title>
+<desc id="description">Source-derived role inheritance and assumption graph for the synthetic Orion policy.</desc>
+<defs>
+<marker id="arrow-teal" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#4ee1c1"/></marker>
+<marker id="arrow-amber" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#ffbb66"/></marker>
+<filter id="shadow" x="-20%" y="-30%" width="140%" height="160%"><feDropShadow dx="0" dy="7" stdDeviation="7" flood-color="#020817" flood-opacity=".45"/></filter>
+</defs>
+<rect width="1400" height="820" rx="28" fill="#07111f"/>
+<circle cx="1250" cy="40" r="280" fill="#143b52" opacity=".28"/>
+<circle cx="90" cy="820" r="300" fill="#153c38" opacity=".24"/>
+<text x="72" y="76" fill="#72ecd3" font-family="ui-monospace,monospace" font-size="15" font-weight="700" letter-spacing="2.5">ROLEPROOF · SOURCE-DERIVED GRAPH</text>
+<text x="72" y="126" fill="#f5f8ff" font-family="ui-sans-serif,system-ui" font-size="38" font-weight="750">How access crosses the role boundary</text>
+<text x="72" y="164" fill="#9fb2ca" font-family="ui-sans-serif,system-ui" font-size="18">Solid = inheritance · dashed = assumption · coral = role on a violated witness</text>
+<path d="M 208 299 C 252 299, 568 518.3333333333333, 612 518.3333333333333" fill="none" stroke="#4ee1c1" stroke-width="3" opacity=".72" marker-end="url(#arrow-teal)"/>
+<path d="M 788 370.66666666666663 C 836 370.66666666666663, -16 402, 32 402" fill="none" stroke="#ffbb66" stroke-width="3" stroke-dasharray="9 8" opacity=".86" marker-end="url(#arrow-amber)"/>
+<path d="M 208 393 C 252 393, 568 283.3333333333333, 612 283.3333333333333" fill="none" stroke="#4ee1c1" stroke-width="3" opacity=".72" marker-end="url(#arrow-teal)"/>
+<path d="M 208 402 C 256 402, 564 449, 612 449" fill="none" stroke="#ffbb66" stroke-width="3" stroke-dasharray="9 8" opacity=".86" marker-end="url(#arrow-amber)"/>
+<path d="M 208 487 C 252 487, 568 596.6666666666666, 612 596.6666666666666" fill="none" stroke="#4ee1c1" stroke-width="3" opacity=".72" marker-end="url(#arrow-teal)"/>
+<path d="M 208 496 C 256 496, 564 370.66666666666663, 612 370.66666666666663" fill="none" stroke="#ffbb66" stroke-width="3" stroke-dasharray="9 8" opacity=".86" marker-end="url(#arrow-amber)"/>
+<path d="M 788 449 C 836 449, 1144 449, 1192 449" fill="none" stroke="#ffbb66" stroke-width="3" stroke-dasharray="9 8" opacity=".86" marker-end="url(#arrow-amber)"/>
+<g data-role-id="approver" transform="translate(32 265)" filter="url(#shadow)">
+<rect width="176" height="68" rx="15" fill="#321b2b" stroke="#ff718c" stroke-width="3"/>
+<text x="88" y="31" text-anchor="middle" fill="#f5f8ff" font-family="ui-monospace,monospace" font-size="14" font-weight="700">approver</text>
+<text x="88" y="51" text-anchor="middle" fill="#ff9caf" font-family="ui-sans-serif,system-ui" font-size="11">assigned entry</text>
+</g>
+<g data-role-id="ci-operator" transform="translate(612 249.33333333333331)" filter="url(#shadow)">
+<rect width="176" height="68" rx="15" fill="#0d2135" stroke="#345372" stroke-width="2"/>
+<text x="88" y="31" text-anchor="middle" fill="#f5f8ff" font-family="ui-monospace,monospace" font-size="14" font-weight="700">ci-operator</text>
+<text x="88" y="51" text-anchor="middle" fill="#8ea5bf" font-family="ui-sans-serif,system-ui" font-size="11">reachable role</text>
+</g>
+<g data-role-id="contractor" transform="translate(612 327.66666666666663)" filter="url(#shadow)">
+<rect width="176" height="68" rx="15" fill="#321b2b" stroke="#ff718c" stroke-width="2"/>
+<text x="88" y="31" text-anchor="middle" fill="#f5f8ff" font-family="ui-monospace,monospace" font-size="14" font-weight="700">contractor</text>
+<text x="88" y="51" text-anchor="middle" fill="#ff9caf" font-family="ui-sans-serif,system-ui" font-size="11">violation path</text>
+</g>
+<g data-role-id="developer" transform="translate(32 359)" filter="url(#shadow)">
+<rect width="176" height="68" rx="15" fill="#321b2b" stroke="#ff718c" stroke-width="3"/>
+<text x="88" y="31" text-anchor="middle" fill="#f5f8ff" font-family="ui-monospace,monospace" font-size="14" font-weight="700">developer</text>
+<text x="88" y="51" text-anchor="middle" fill="#ff9caf" font-family="ui-sans-serif,system-ui" font-size="11">assigned entry</text>
+</g>
+<g data-role-id="intern" transform="translate(32 453)" filter="url(#shadow)">
+<rect width="176" height="68" rx="15" fill="#321b2b" stroke="#ff718c" stroke-width="3"/>
+<text x="88" y="31" text-anchor="middle" fill="#f5f8ff" font-family="ui-monospace,monospace" font-size="14" font-weight="700">intern</text>
+<text x="88" y="51" text-anchor="middle" fill="#ff9caf" font-family="ui-sans-serif,system-ui" font-size="11">assigned entry</text>
+</g>
+<g data-role-id="payroll-analyst" transform="translate(32 547)" filter="url(#shadow)">
+<rect width="176" height="68" rx="15" fill="#0d2135" stroke="#62b5ff" stroke-width="3"/>
+<text x="88" y="31" text-anchor="middle" fill="#f5f8ff" font-family="ui-monospace,monospace" font-size="14" font-weight="700">payroll-analyst</text>
+<text x="88" y="51" text-anchor="middle" fill="#8ea5bf" font-family="ui-sans-serif,system-ui" font-size="11">assigned entry</text>
+</g>
+<g data-role-id="prod-admin" transform="translate(1192 406)" filter="url(#shadow)">
+<rect width="176" height="68" rx="15" fill="#321b2b" stroke="#ff718c" stroke-width="2"/>
+<text x="88" y="31" text-anchor="middle" fill="#f5f8ff" font-family="ui-monospace,monospace" font-size="14" font-weight="700">prod-admin</text>
+<text x="88" y="51" text-anchor="middle" fill="#ff9caf" font-family="ui-sans-serif,system-ui" font-size="11">violation path</text>
+</g>
+<g data-role-id="release-manager" transform="translate(612 406)" filter="url(#shadow)">
+<rect width="176" height="68" rx="15" fill="#321b2b" stroke="#ff718c" stroke-width="2"/>
+<text x="88" y="31" text-anchor="middle" fill="#f5f8ff" font-family="ui-monospace,monospace" font-size="14" font-weight="700">release-manager</text>
+<text x="88" y="51" text-anchor="middle" fill="#ff9caf" font-family="ui-sans-serif,system-ui" font-size="11">violation path</text>
+</g>
+<g data-role-id="requester" transform="translate(612 484.33333333333326)" filter="url(#shadow)">
+<rect width="176" height="68" rx="15" fill="#321b2b" stroke="#ff718c" stroke-width="2"/>
+<text x="88" y="31" text-anchor="middle" fill="#f5f8ff" font-family="ui-monospace,monospace" font-size="14" font-weight="700">requester</text>
+<text x="88" y="51" text-anchor="middle" fill="#ff9caf" font-family="ui-sans-serif,system-ui" font-size="11">violation path</text>
+</g>
+<g data-role-id="support-reader" transform="translate(612 562.6666666666666)" filter="url(#shadow)">
+<rect width="176" height="68" rx="15" fill="#0d2135" stroke="#345372" stroke-width="2"/>
+<text x="88" y="31" text-anchor="middle" fill="#f5f8ff" font-family="ui-monospace,monospace" font-size="14" font-weight="700">support-reader</text>
+<text x="88" y="51" text-anchor="middle" fill="#8ea5bf" font-family="ui-sans-serif,system-ui" font-size="11">reachable role</text>
+</g>
+<rect x="72" y="744" width="1256" height="1" fill="#28425e"/>
+<text x="72" y="782" fill="#8298b3" font-family="ui-monospace,monospace" font-size="13">policy f022e5ebe24dd5f7 · result 10d2ba62b719bf2c · 10 roles · 4 violations</text>
+</svg>
