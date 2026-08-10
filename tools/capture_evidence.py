@@ -44,10 +44,12 @@ TEXT_OUTPUTS: Final = {
 }
 SECRET_PATTERNS: Final = (
     re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY-----"),
-    re.compile(r"AKIA[0-9A-Z]{16}"),
-    re.compile(r"(?:ghp|github_pat)_[A-Za-z0-9_]{20,}"),
-    re.compile(r"(?i)(?:api[_-]?key|secret|password)s*[:=]s*S+"),
-    re.compile(r"[w.+-]+@[w.-]+.[A-Za-z]{2,}"),
+    re.compile(r"\bAKIA[0-9A-Z]{16}\b"),
+    re.compile(r"\b(?:ghp|github_pat)_[A-Za-z0-9_]{20,}\b"),
+    re.compile(
+        r"(?i)\b(?:api[_-]?key|secret|password)\s*[:=]\s*\S+"
+    ),
+    re.compile(r"[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}"),
 )
 MIME: Final = {
     ".css": "text/css; charset=utf-8",
@@ -77,10 +79,13 @@ def regular_bytes(path: Path, maximum: int = 8 * 1024 * 1024) -> bytes:
 
 
 def json_bytes(value: object) -> bytes:
-    return (
-        json.dumps(value, ensure_ascii=True, indent=2, sort_keys=True) + "
-"
-    ).encode("ascii")
+    serialized = json.dumps(
+        value,
+        ensure_ascii=True,
+        indent=2,
+        sort_keys=True,
+    )
+    return (serialized + "\n").encode("ascii")
 
 
 def write_output(path: Path, payload: bytes) -> None:
@@ -125,7 +130,7 @@ class StaticHandler(BaseHTTPRequestHandler):
     root: Path
 
     def do_GET(self) -> None:
-        if "?" in self.path or "%" in self.path or "\" in self.path:
+        if any(token in self.path for token in ("?", "%", "\\")):
             self.send_error(400)
             return
         relative = "index.html" if self.path == "/" else self.path.lstrip("/")
@@ -173,55 +178,29 @@ def start_static_server(root: Path) -> tuple[ThreadingHTTPServer, str]:
 
 
 def architecture_svg() -> bytes:
-    modules = (
-        "src/contracts.mjs",
-        "src/analyze.mjs",
-        "src/verify.mjs",
-        "src/bundle.mjs",
-        "web/app.js",
-    )
-    boxes = [
-        (70, 210, 210, 88, "Strict policy", modules[0], "#58dfc2"),
-        (350, 105, 230, 88, "Analyzer", "bounded BFS", "#70b7ff"),
-        (350, 315, 230, 88, "Verifier", "Floyd-Warshall", "#ffbf69"),
-        (650, 210, 230, 88, "Proof bundle", modules[3], "#c59cff"),
-        (950, 210, 230, 88, "Dashboard", modules[4], "#ff8298"),
-    ]
-    parts = [
-        '<?xml version="1.0" encoding="UTF-8"?>',
-        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1260 540" role="img" aria-labelledby="t d">',
-        '<title id="t">RoleProof verification architecture</title>',
-        '<desc id="d">The analyzer and verifier independently consume the same normalized policy before the bundle reaches the dashboard.</desc>',
-        '<rect width="1260" height="540" rx="28" fill="#07111f"/>',
-        '<text x="64" y="68" fill="#65e5ca" font-family="ui-monospace,monospace" font-size="14" font-weight="700" letter-spacing="2">ROLEPROOF · VERIFICATION ARCHITECTURE</text>',
-        '<text x="64" y="116" fill="#f4f8ff" font-family="ui-sans-serif,system-ui" font-size="34" font-weight="750">Two algorithms. One closed receipt.</text>',
-        '<path d="M 280 238 C 315 238 315 149 350 149" fill="none" stroke="#70b7ff" stroke-width="3"/>',
-        '<path d="M 280 270 C 315 270 315 359 350 359" fill="none" stroke="#ffbf69" stroke-width="3"/>',
-        '<path d="M 580 149 C 620 149 610 238 650 238" fill="none" stroke="#70b7ff" stroke-width="3"/>',
-        '<path d="M 580 359 C 620 359 610 270 650 270" fill="none" stroke="#ffbf69" stroke-width="3"/>',
-        '<path d="M 880 254 L 950 254" fill="none" stroke="#c59cff" stroke-width="3"/>',
-    ]
-    for x, y, width, height, title, detail, color in boxes:
-        parts.extend(
-            [
-                '<g transform="translate(' + str(x) + " " + str(y) + ')">',
-                '<rect width="' + str(width) + '" height="' + str(height) + '" rx="15" fill="#0d2034" stroke="' + color + '" stroke-width="2"/>',
-                '<text x="18" y="35" fill="#f4f8ff" font-family="ui-sans-serif,system-ui" font-size="18" font-weight="700">' + html.escape(title) + "</text>",
-                '<text x="18" y="61" fill="#91a8c1" font-family="ui-monospace,monospace" font-size="12">' + html.escape(detail) + "</text>",
-                "</g>",
-            ]
-        )
-    parts.extend(
-        [
-            '<text x="350" y="442" fill="#7890aa" font-family="ui-sans-serif,system-ui" font-size="14">No analyzer import</text>',
-            '<text x="350" y="466" fill="#7890aa" font-family="ui-sans-serif,system-ui" font-size="14">Independent closure + witness checks</text>',
-            '<text x="64" y="504" fill="#667f99" font-family="ui-monospace,monospace" font-size="12">Validated modules: ' + str(len(modules)) + " · dependency-free runtime</text>",
-            "</svg>",
-            "",
-        ]
-    )
-    return "
-".join(parts).encode("utf-8")
+    svg = """<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1260 540" role="img" aria-labelledby="t d">
+<title id="t">RoleProof verification architecture</title>
+<desc id="d">The analyzer and verifier independently consume the normalized policy before the closed bundle reaches the dashboard.</desc>
+<rect width="1260" height="540" rx="28" fill="#07111f"/>
+<text x="64" y="68" fill="#65e5ca" font-family="ui-monospace,monospace" font-size="14" font-weight="700" letter-spacing="2">ROLEPROOF · VERIFICATION ARCHITECTURE</text>
+<text x="64" y="116" fill="#f4f8ff" font-family="ui-sans-serif,system-ui" font-size="34" font-weight="750">Two algorithms. One closed receipt.</text>
+<path d="M280 238 C315 238 315 149 350 149" fill="none" stroke="#70b7ff" stroke-width="3"/>
+<path d="M280 270 C315 270 315 359 350 359" fill="none" stroke="#ffbf69" stroke-width="3"/>
+<path d="M580 149 C620 149 610 238 650 238" fill="none" stroke="#70b7ff" stroke-width="3"/>
+<path d="M580 359 C620 359 610 270 650 270" fill="none" stroke="#ffbf69" stroke-width="3"/>
+<path d="M880 254 L950 254" fill="none" stroke="#c59cff" stroke-width="3"/>
+<g transform="translate(70 210)"><rect width="210" height="88" rx="15" fill="#0d2034" stroke="#58dfc2" stroke-width="2"/><text x="18" y="35" fill="#f4f8ff" font-family="ui-sans-serif,system-ui" font-size="18" font-weight="700">Strict policy</text><text x="18" y="61" fill="#91a8c1" font-family="ui-monospace,monospace" font-size="12">src/contracts.mjs</text></g>
+<g transform="translate(350 105)"><rect width="230" height="88" rx="15" fill="#0d2034" stroke="#70b7ff" stroke-width="2"/><text x="18" y="35" fill="#f4f8ff" font-family="ui-sans-serif,system-ui" font-size="18" font-weight="700">Analyzer</text><text x="18" y="61" fill="#91a8c1" font-family="ui-monospace,monospace" font-size="12">bounded BFS</text></g>
+<g transform="translate(350 315)"><rect width="230" height="88" rx="15" fill="#0d2034" stroke="#ffbf69" stroke-width="2"/><text x="18" y="35" fill="#f4f8ff" font-family="ui-sans-serif,system-ui" font-size="18" font-weight="700">Verifier</text><text x="18" y="61" fill="#91a8c1" font-family="ui-monospace,monospace" font-size="12">Floyd-Warshall</text></g>
+<g transform="translate(650 210)"><rect width="230" height="88" rx="15" fill="#0d2034" stroke="#c59cff" stroke-width="2"/><text x="18" y="35" fill="#f4f8ff" font-family="ui-sans-serif,system-ui" font-size="18" font-weight="700">Proof bundle</text><text x="18" y="61" fill="#91a8c1" font-family="ui-monospace,monospace" font-size="12">src/bundle.mjs</text></g>
+<g transform="translate(950 210)"><rect width="230" height="88" rx="15" fill="#0d2034" stroke="#ff8298" stroke-width="2"/><text x="18" y="35" fill="#f4f8ff" font-family="ui-sans-serif,system-ui" font-size="18" font-weight="700">Dashboard</text><text x="18" y="61" fill="#91a8c1" font-family="ui-monospace,monospace" font-size="12">web/app.js</text></g>
+<text x="350" y="442" fill="#7890aa" font-family="ui-sans-serif,system-ui" font-size="14">No analyzer import</text>
+<text x="350" y="466" fill="#7890aa" font-family="ui-sans-serif,system-ui" font-size="14">Independent closure + witness checks</text>
+<text x="64" y="504" fill="#667f99" font-family="ui-monospace,monospace" font-size="12">Validated modules: 5 · dependency-free runtime</text>
+</svg>
+"""
+    return svg.encode("utf-8")
 
 
 def summary_svg(receipt: dict[str, object]) -> bytes:
@@ -232,73 +211,54 @@ def summary_svg(receipt: dict[str, object]) -> bytes:
     critical = summary["critical_violations"]
     violation_width = int(880 * violations / total)
     pass_width = 880 - violation_width
-    return (
-        '<?xml version="1.0" encoding="UTF-8"?>
-'
-        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 470" role="img" aria-labelledby="t d">
-'
-        '<title id="t">RoleProof constraint results</title>
-'
-        '<desc id="d">Four of five synthetic constraints violate the declared policy, including three critical violations.</desc>
-'
-        '<rect width="1120" height="470" rx="28" fill="#07111f"/>
-'
-        '<text x="64" y="66" fill="#65e5ca" font-family="ui-monospace,monospace" font-size="14" font-weight="700" letter-spacing="2">EXACT SYNTHETIC RESULT</text>
-'
-        '<text x="64" y="118" fill="#f4f8ff" font-family="ui-sans-serif,system-ui" font-size="34" font-weight="750">Constraint closure at a glance</text>
-'
-        '<rect x="64" y="176" width="' + str(violation_width) + '" height="52" rx="12" fill="#ff718c"/>
-'
-        '<rect x="' + str(64 + violation_width) + '" y="176" width="' + str(pass_width) + '" height="52" rx="12" fill="#72e39b"/>
-'
-        '<text x="64" y="280" fill="#ff9daf" font-family="ui-sans-serif,system-ui" font-size="54" font-weight="780">' + str(violations) + '</text>
-'
-        '<text x="112" y="276" fill="#9cafc5" font-family="ui-sans-serif,system-ui" font-size="15">verified violations</text>
-'
-        '<text x="410" y="280" fill="#ffbd69" font-family="ui-sans-serif,system-ui" font-size="54" font-weight="780">' + str(critical) + '</text>
-'
-        '<text x="458" y="276" fill="#9cafc5" font-family="ui-sans-serif,system-ui" font-size="15">critical paths</text>
-'
-        '<text x="746" y="280" fill="#82e8a5" font-family="ui-sans-serif,system-ui" font-size="54" font-weight="780">' + str(passes) + '</text>
-'
-        '<text x="792" y="276" fill="#9cafc5" font-family="ui-sans-serif,system-ui" font-size="15">closed constraint</text>
-'
-        '<line x1="64" y1="338" x2="1056" y2="338" stroke="#27425f"/>
-'
-        '<text x="64" y="382" fill="#8098b2" font-family="ui-monospace,monospace" font-size="13">policy ' + receipt["policy_sha256"][:16] + ' · result ' + receipt["result_sha256"][:16] + '</text>
-'
-        '<text x="64" y="414" fill="#607892" font-family="ui-sans-serif,system-ui" font-size="13">Synthetic Orion fixture · not a benchmark or live IAM attestation</text>
-'
-        '</svg>
-'
-    ).encode("utf-8")
+    policy = receipt["policy_sha256"][:16]
+    result = receipt["result_sha256"][:16]
+    svg = f"""<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 470" role="img" aria-labelledby="t d">
+<title id="t">RoleProof constraint results</title>
+<desc id="d">{violations} of {total} synthetic constraints violate the declared policy, including {critical} critical violations.</desc>
+<rect width="1120" height="470" rx="28" fill="#07111f"/>
+<text x="64" y="66" fill="#65e5ca" font-family="ui-monospace,monospace" font-size="14" font-weight="700" letter-spacing="2">EXACT SYNTHETIC RESULT</text>
+<text x="64" y="118" fill="#f4f8ff" font-family="ui-sans-serif,system-ui" font-size="34" font-weight="750">Constraint closure at a glance</text>
+<rect x="64" y="176" width="{violation_width}" height="52" rx="12" fill="#ff718c"/>
+<rect x="{64 + violation_width}" y="176" width="{pass_width}" height="52" rx="12" fill="#72e39b"/>
+<text x="64" y="280" fill="#ff9daf" font-family="ui-sans-serif,system-ui" font-size="54" font-weight="780">{violations}</text>
+<text x="112" y="276" fill="#9cafc5" font-family="ui-sans-serif,system-ui" font-size="15">verified violations</text>
+<text x="410" y="280" fill="#ffbd69" font-family="ui-sans-serif,system-ui" font-size="54" font-weight="780">{critical}</text>
+<text x="458" y="276" fill="#9cafc5" font-family="ui-sans-serif,system-ui" font-size="15">critical paths</text>
+<text x="746" y="280" fill="#82e8a5" font-family="ui-sans-serif,system-ui" font-size="54" font-weight="780">{passes}</text>
+<text x="792" y="276" fill="#9cafc5" font-family="ui-sans-serif,system-ui" font-size="15">closed constraint</text>
+<line x1="64" y1="338" x2="1056" y2="338" stroke="#27425f"/>
+<text x="64" y="382" fill="#8098b2" font-family="ui-monospace,monospace" font-size="13">policy {policy} · result {result}</text>
+<text x="64" y="414" fill="#607892" font-family="ui-sans-serif,system-ui" font-size="13">Synthetic Orion fixture · not a benchmark or live IAM attestation</text>
+</svg>
+"""
+    return svg.encode("utf-8")
 
 
 def cli_page(stdout: str) -> str:
-    escaped = html.escape(stdout)
-    return (
-        "<!doctype html><html><head><meta charset="utf-8"><style>"
-        "*{box-sizing:border-box}body{margin:0;width:1180px;height:640px;"
-        "display:grid;place-items:center;background:#06101c;color:#dceaff;"
-        "font-family:ui-monospace,SFMono-Regular,monospace}"
-        ".window{width:1080px;border:1px solid #2a4663;border-radius:18px;"
-        "overflow:hidden;background:#091725;box-shadow:0 28px 90px #0008}"
-        ".bar{height:52px;display:flex;align-items:center;gap:9px;padding:0 20px;"
-        "border-bottom:1px solid #233c56;background:#0d1c2d}"
-        ".dot{width:11px;height:11px;border-radius:50%;background:#ff718c}"
-        ".dot:nth-child(2){background:#ffbd69}.dot:nth-child(3){background:#58dfc2}"
-        ".title{margin-left:14px;color:#7990aa;font:12px ui-sans-serif,system-ui}"
-        "pre{margin:0;padding:34px 38px 40px;white-space:pre-wrap;"
-        "font-size:16px;line-height:1.65}.prompt{color:#58dfc2}"
-        "</style></head><body><main class="window"><div class="bar">"
-        "<span class="dot"></span><span class="dot"></span><span class="dot"></span>"
-        "<span class="title">actual RoleProof CLI · Node 22.23.1</span></div>"
-        "<pre><span class="prompt">$ roleproof audit examples/orion.synthetic.json --out roleproof-audit</span>
+    prefix = """<!doctype html><html><head><meta charset="utf-8"><style>
+*{box-sizing:border-box}body{margin:0;width:1180px;height:640px;display:grid;place-items:center;background:#06101c;color:#dceaff;font-family:ui-monospace,SFMono-Regular,monospace}
+.window{width:1080px;border:1px solid #2a4663;border-radius:18px;overflow:hidden;background:#091725;box-shadow:0 28px 90px #0008}
+.bar{height:52px;display:flex;align-items:center;gap:9px;padding:0 20px;border-bottom:1px solid #233c56;background:#0d1c2d}
+.dot{width:11px;height:11px;border-radius:50%;background:#ff718c}.dot:nth-child(2){background:#ffbd69}.dot:nth-child(3){background:#58dfc2}
+.title{margin-left:14px;color:#7990aa;font:12px ui-sans-serif,system-ui}
+pre{margin:0;padding:34px 38px 40px;white-space:pre-wrap;font-size:16px;line-height:1.65}.prompt{color:#58dfc2}
+</style></head><body><main class="window"><div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="title">actual RoleProof CLI · Node 22.23.1</span></div><pre><span class="prompt">$ roleproof audit examples/orion.synthetic.json --out roleproof-audit</span>
 
-"
-        + escaped
-        + "</pre></main></body></html>"
-    )
+"""
+    return prefix + html.escape(stdout) + "</pre></main></body></html>"
+
+
+def normalized_frames(frames: list[Image.Image]) -> list[Image.Image]:
+    width = max(frame.width for frame in frames)
+    height = max(frame.height for frame in frames)
+    normalized: list[Image.Image] = []
+    for frame in frames:
+        canvas = Image.new("RGB", (width, height), "#07111f")
+        canvas.paste(frame, (0, 0))
+        normalized.append(canvas)
+    return normalized
 
 
 def capture(
@@ -385,23 +345,33 @@ def capture(
             page.set_viewport_size({"width": 1440, "height": 900})
             workspace = page.locator(".workspace")
             workspace.scroll_into_view_if_needed()
-            frames: list[Image.Image] = []
-            frames.append(
-                Image.open(io.BytesIO(workspace.screenshot())).convert("RGB")
-            )
+            frames: list[Image.Image] = [
+                Image.open(
+                    io.BytesIO(workspace.screenshot(animations="disabled"))
+                ).convert("RGB")
+            ]
             for selector in (
                 '[data-constraint="builder-no-prod-admin"]',
                 '[data-constraint="approver-no-request"]',
             ):
                 page.locator(selector).click()
                 frames.append(
-                    Image.open(io.BytesIO(workspace.screenshot())).convert("RGB")
+                    Image.open(
+                        io.BytesIO(
+                            workspace.screenshot(animations="disabled")
+                        )
+                    ).convert("RGB")
                 )
             page.locator('[data-filter="pass"]').click()
-            page.locator('[data-constraint="payroll-no-prod-deploy"]').click()
+            page.locator(
+                '[data-constraint="payroll-no-prod-deploy"]'
+            ).click()
             frames.append(
-                Image.open(io.BytesIO(workspace.screenshot())).convert("RGB")
+                Image.open(
+                    io.BytesIO(workspace.screenshot(animations="disabled"))
+                ).convert("RGB")
             )
+            frames = normalized_frames(frames)
             frames[0].save(
                 destination / "roleproof-interaction.gif",
                 append_images=frames[1:],
