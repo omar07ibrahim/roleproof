@@ -8,26 +8,153 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: roleproof-quality-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   core:
-    name: Core (Node 22.23.1)
+    name: Core (Node ${{ matrix.node }})
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 12
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ["22.23.1", "24.16.0"]
     steps:
       - name: Check out exact revision
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Install exact Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "${{ matrix.node }}"
+          package-manager-cache: false
+
+      - name: Verify runtime, contracts, and build
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(node --version)" = "v${{ matrix.node }}"
+          PYTHONDONTWRITEBYTECODE=1 python3 -c 'from pathlib import Path; compile(Path("tools/capture_evidence.py").read_bytes(), "tools/capture_evidence.py", "exec")'
+          npm ci --ignore-scripts
+          npm run check
+          npm run build
+          git diff --check
+          test -z "$(git status --porcelain=v1 --untracked-files=all)"
+
+  distribution:
+    name: Installed package contract
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - name: Check out exact revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
       - name: Install exact Node
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: "22.23.1"
           package-manager-cache: false
-      - name: Install empty locked dependency graph
-        run: npm ci --ignore-scripts
-      - name: Verify contracts and behavior
-        run: npm run check
-      - name: Enforce read-only verification
+
+      - name: Build and inspect package archive
+        shell: bash
         run: |
-          git diff --check
-          test -z "$(git status --porcelain=v1 --untracked-files=all)"
+          set -euo pipefail
+          npm ci --ignore-scripts
+          npm run build
+          npm pack --ignore-scripts --json >"$RUNNER_TEMP/pack.json"
+          archive="$(PACK_JSON="$RUNNER_TEMP/pack.json" node -e 'const fs=require("node:fs"); const value=JSON.parse(fs.readFileSync(process.env.PACK_JSON,"utf8")); if(value.length!==1 || !value[0].filename) process.exit(1); process.stdout.write(value[0].filename)')"
+          test -f "$archive"
+          test "$(find . -maxdepth 1 -name '*.tgz' -type f | wc -l)" -eq 1
+          PACK_JSON="$RUNNER_TEMP/pack.json" node <<'NODE'
+          const fs = require("node:fs");
+          const [entry] = JSON.parse(
+            fs.readFileSync(process.env.PACK_JSON, "utf8"),
+          );
+          const paths = new Set(entry.files.map((file) => file.path));
+          const required = [
+            "LICENSE",
+            "README.md",
+            "SECURITY.md",
+            "dist/data/analysis.receipt.json",
+            "dist/data/verification.json",
+            "dist/index.html",
+            "examples/orion.synthetic.json",
+            "package.json",
+            "src/api.mjs",
+            "src/cli.mjs",
+          ];
+          for (const path of required) {
+            if (!paths.has(path)) throw new Error("missing_package_file:" + path);
+          }
+          for (const path of paths) {
+            if (
+              path.startsWith(".github/") ||
+              path.startsWith("node_modules/") ||
+              path.startsWith("test/")
+            ) {
+              throw new Error("unexpected_package_file:" + path);
+            }
+          }
+          if (entry.size > 3 * 1024 * 1024) {
+            throw new Error("archive_too_large");
+          }
+          if (entry.unpackedSize > 8 * 1024 * 1024) {
+            throw new Error("package_too_large");
+          }
+          NODE
+          echo "ARCHIVE=$archive" >>"$GITHUB_ENV"
+
+      - name: Exercise installed API and CLI outside checkout
+        shell: bash
+        run: |
+          set -euo pipefail
+          consumer="$RUNNER_TEMP/roleproof-consumer"
+          mkdir "$consumer"
+          cd "$consumer"
+          npm init --yes >/dev/null
+          npm install --ignore-scripts --no-audit --no-fund "$GITHUB_WORKSPACE/$ARCHIVE"
+          policy="$consumer/node_modules/roleproof/examples/orion.synthetic.json"
+          ./node_modules/.bin/roleproof audit "$policy" --out roleproof-audit >audit.stdout.txt
+          ./node_modules/.bin/roleproof verify "$policy" roleproof-audit/analysis.receipt.json >verification.json
+          grep -Fx "ROLEPROOF AUDIT VERIFIED" audit.stdout.txt
+          node --input-type=module <<'NODE'
+          import { readFile } from "node:fs/promises";
+          import {
+            ENGINE_VERSION,
+            analyzePolicy,
+            parsePolicyBytes,
+            verifyReceipt,
+          } from "roleproof";
+          const policy = parsePolicyBytes(
+            await readFile(
+              new URL(
+                "./node_modules/roleproof/examples/orion.synthetic.json",
+                import.meta.url,
+              ),
+            ),
+          );
+          const receipt = analyzePolicy(policy);
+          const verification = verifyReceipt(policy, receipt);
+          if (
+            ENGINE_VERSION !== "0.1.0" ||
+            receipt.result.summary.violations !== 4 ||
+            receipt.result.summary.passes !== 1 ||
+            verification.status !== "verified"
+          ) {
+            throw new Error("installed_api_contract_failed");
+          }
+          const cliVerification = JSON.parse(
+            await readFile("verification.json", "utf8"),
+          );
+          if (cliVerification.status !== "verified") {
+            throw new Error("installed_cli_contract_failed");
+          }
+          NODE
