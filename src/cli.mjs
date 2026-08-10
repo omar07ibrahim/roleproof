@@ -9,25 +9,19 @@ import { readStrictJsonFile } from "./io.mjs";
 import { runServerUntilSignal } from "./server.mjs";
 import { verifyReceipt } from "./verify.mjs";
 
-const WORKSPACE_ROOT = path.resolve(process.cwd());
+const SAFE_PATH = /^(?:\/)?[A-Za-z0-9._-]+(?:\/[A-Za-z0-9._-]+)*$/u;
 
-function workspacePath(value) {
+function validatedPath(value) {
   if (
     typeof value !== "string" ||
     value.length < 1 ||
     value.length > 4096 ||
-    value.includes("\u0000")
+    !SAFE_PATH.test(value) ||
+    value.split("/").some((segment) => segment === "." || segment === "..")
   ) {
     throw new Error("invalid_arguments");
   }
-  const candidate = path.resolve(WORKSPACE_ROOT, value);
-  const prefix = WORKSPACE_ROOT.endsWith(path.sep)
-    ? WORKSPACE_ROOT
-    : WORKSPACE_ROOT + path.sep;
-  if (!candidate.startsWith(prefix)) {
-    throw new Error("invalid_arguments");
-  }
-  return candidate;
+  return path.resolve(value);
 }
 
 function usage() {
@@ -54,10 +48,9 @@ async function audit(arguments_) {
     throw new Error("invalid_arguments");
   }
   const policy = await readPolicyFile(
-    workspacePath(arguments_[0]),
-    WORKSPACE_ROOT,
+    validatedPath(arguments_[0]),
   );
-  const built = await writeAuditBundle(policy, workspacePath(arguments_[2]));
+  const built = await writeAuditBundle(policy, validatedPath(arguments_[2]));
   const summary = built.receipt.result.summary;
   process.stdout.write(
     [
@@ -83,7 +76,7 @@ async function analyze(arguments_) {
   process.stdout.write(
     json(
       analyzePolicy(
-        await readPolicyFile(workspacePath(arguments_[0]), WORKSPACE_ROOT),
+        await readPolicyFile(validatedPath(arguments_[0])),
       ),
     ),
   );
@@ -94,13 +87,10 @@ async function verify(arguments_) {
     throw new Error("invalid_arguments");
   }
   const policy = await readPolicyFile(
-    workspacePath(arguments_[0]),
-    WORKSPACE_ROOT,
+    validatedPath(arguments_[0]),
   );
   const receipt = await readStrictJsonFile(
-    workspacePath(arguments_[1]),
-    undefined,
-    WORKSPACE_ROOT,
+    validatedPath(arguments_[1]),
   );
   process.stdout.write(json(verifyReceipt(policy, receipt)));
 }
