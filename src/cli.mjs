@@ -18,7 +18,13 @@ const PACKAGE_ROOT = path.resolve(
   "..",
 );
 const TRUSTED_ROOTS = Object.freeze(
-  [...new Set([process.cwd(), os.tmpdir(), PACKAGE_ROOT].map(realpathSync))],
+  [
+    ...new Set(
+      [process.cwd(), os.tmpdir(), PACKAGE_ROOT].map((root) =>
+        realpathSync(root),
+      ),
+    ),
+  ],
 );
 
 function normalizedPath(value) {
