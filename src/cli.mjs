@@ -82,14 +82,22 @@ async function serve(arguments_) {
   await runServerUntilSignal({ port });
 }
 
-async function main(argv) {
-  const [command, ...arguments_] = argv;
-  if (command === "audit") return audit(arguments_);
-  if (command === "analyze") return analyze(arguments_);
-  if (command === "verify") return verify(arguments_);
-  if (command === "serve") return serve(arguments_);
+function invalidCommand() {
   process.stderr.write(usage() + "\n");
   process.exitCode = 64;
+}
+
+const COMMANDS = new Map([
+  ["audit", audit],
+  ["analyze", analyze],
+  ["serve", serve],
+  ["verify", verify],
+]);
+
+async function main(argv) {
+  const [command, ...arguments_] = argv;
+  const handler = COMMANDS.get(command) ?? invalidCommand;
+  return handler(arguments_);
 }
 
 try {
