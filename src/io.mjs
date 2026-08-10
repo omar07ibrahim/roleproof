@@ -1,7 +1,6 @@
 import { constants } from "node:fs";
 import { mkdir, open, realpath, rm } from "node:fs/promises";
 import path from "node:path";
-import path from "node:path";
 
 import { parseJsonStrict, StrictJsonError } from "./json.mjs";
 
