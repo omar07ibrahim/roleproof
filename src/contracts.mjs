@@ -1,5 +1,5 @@
 import { constants } from "node:fs";
-import { lstat, open } from "node:fs/promises";
+import { open } from "node:fs/promises";
 
 import { parseJsonStrict, StrictJsonError } from "./json.mjs";
 
@@ -312,24 +312,31 @@ function sameFile(left, right) {
 }
 
 export async function readPolicyFile(path) {
-  const visible = await lstat(path, { bigint: true });
-  if (!visible.isFile() || visible.isSymbolicLink() || visible.size > MAX_POLICY_BYTES) {
+  if (typeof constants.O_NOFOLLOW !== "number") {
     fail("invalid_file", "$");
   }
   const flags =
     constants.O_RDONLY |
     (constants.O_CLOEXEC ?? 0) |
-    (constants.O_NOFOLLOW ?? 0);
-  const handle = await open(path, flags);
+    constants.O_NOFOLLOW;
+  let handle;
+  try {
+    handle = await open(path, flags);
+  } catch {
+    fail("invalid_file", "$");
+  }
   try {
     const opened = await handle.stat({ bigint: true });
-    if (!sameFile(visible, opened)) fail("file_changed", "$");
+    if (
+      !opened.isFile() ||
+      opened.isSymbolicLink() ||
+      opened.size > BigInt(MAX_POLICY_BYTES)
+    ) {
+      fail("invalid_file", "$");
+    }
     const payload = await handle.readFile();
     const completed = await handle.stat({ bigint: true });
-    const final = await lstat(path, { bigint: true });
-    if (!sameFile(opened, completed) || !sameFile(opened, final)) {
-      fail("file_changed", "$");
-    }
+    if (!sameFile(opened, completed)) fail("file_changed", "$");
     return parsePolicyBytes(payload);
   } finally {
     await handle.close();

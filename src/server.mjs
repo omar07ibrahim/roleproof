@@ -1,5 +1,6 @@
 import { createServer } from "node:http";
-import { lstat, readFile, readdir } from "node:fs/promises";
+import { constants } from "node:fs";
+import { open, readdir } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 
@@ -39,6 +40,17 @@ const SECURITY_HEADERS = {
   "X-Frame-Options": "DENY",
 };
 
+function sameFile(left, right) {
+  return (
+    left.dev === right.dev &&
+    left.ino === right.ino &&
+    left.mode === right.mode &&
+    left.size === right.size &&
+    left.mtimeNs === right.mtimeNs &&
+    left.ctimeNs === right.ctimeNs
+  );
+}
+
 async function inventory(directory, prefix = "") {
   const names = [];
   for (const entry of await readdir(directory, { withFileTypes: true })) {
@@ -59,19 +71,44 @@ export async function loadAssets(root = DEFAULT_ROOT) {
   if (names.join("\n") !== EXPECTED.join("\n")) {
     throw new Error("invalid_asset_inventory");
   }
+  if (typeof constants.O_NOFOLLOW !== "number") {
+    throw new Error("invalid_asset");
+  }
+  const flags =
+    constants.O_RDONLY |
+    (constants.O_CLOEXEC ?? 0) |
+    constants.O_NOFOLLOW;
   const assets = new Map();
   for (const name of names) {
     const filePath = path.join(root, name);
-    const status = await lstat(filePath);
-    if (!status.isFile() || status.isSymbolicLink() || status.size > 1024 * 1024) {
+    let handle;
+    try {
+      handle = await open(filePath, flags);
+    } catch {
       throw new Error("invalid_asset");
     }
-    const payload = await readFile(filePath);
-    const route = name === "index.html" ? "/" : "/" + name;
-    assets.set(route, {
-      contentType: MIME.get(path.extname(name)),
-      payload,
-    });
+    try {
+      const opened = await handle.stat({ bigint: true });
+      if (
+        !opened.isFile() ||
+        opened.isSymbolicLink() ||
+        opened.size > 1024n * 1024n
+      ) {
+        throw new Error("invalid_asset");
+      }
+      const payload = await handle.readFile();
+      const completed = await handle.stat({ bigint: true });
+      if (!sameFile(opened, completed)) {
+        throw new Error("asset_changed");
+      }
+      const route = name === "index.html" ? "/" : "/" + name;
+      assets.set(route, {
+        contentType: MIME.get(path.extname(name)),
+        payload,
+      });
+    } finally {
+      await handle.close();
+    }
   }
   return assets;
 }
