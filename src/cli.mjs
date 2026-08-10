@@ -1,11 +1,80 @@
 #!/usr/bin/env node
 
+import { realpathSync } from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
 import { analyzePolicy } from "./analyze.mjs";
 import { writeAuditBundle } from "./bundle.mjs";
 import { readPolicyFile } from "./contracts.mjs";
 import { readStrictJsonFile } from "./io.mjs";
 import { runServerUntilSignal } from "./server.mjs";
 import { verifyReceipt } from "./verify.mjs";
+
+const SAFE_PATH = /^(?:\/)?[A-Za-z0-9._-]+(?:\/[A-Za-z0-9._-]+)*$/u;
+const PACKAGE_ROOT = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  "..",
+);
+const TRUSTED_ROOTS = Object.freeze(
+  [
+    ...new Set(
+      [process.cwd(), os.tmpdir(), PACKAGE_ROOT].map((root) =>
+        realpathSync(root),
+      ),
+    ),
+  ],
+);
+
+function normalizedPath(value) {
+  if (
+    typeof value !== "string" ||
+    value.length < 1 ||
+    value.length > 4096 ||
+    !SAFE_PATH.test(value) ||
+    value.split("/").some((segment) => segment === "." || segment === "..")
+  ) {
+    throw new Error("invalid_arguments");
+  }
+  return path.resolve(value);
+}
+
+function withinTrustedRoot(candidate) {
+  return TRUSTED_ROOTS.some((root) => {
+    const prefix = root.endsWith(path.sep) ? root : root + path.sep;
+    return candidate.startsWith(prefix);
+  });
+}
+
+function validatedInputPath(value) {
+  const candidate = normalizedPath(value);
+  let canonical;
+  try {
+    canonical = realpathSync(candidate);
+  } catch {
+    throw new Error("invalid_arguments");
+  }
+  if (canonical !== candidate || !withinTrustedRoot(canonical)) {
+    throw new Error("invalid_arguments");
+  }
+  return canonical;
+}
+
+function validatedOutputPath(value) {
+  const candidate = normalizedPath(value);
+  let parent;
+  try {
+    parent = realpathSync(path.dirname(candidate));
+  } catch {
+    throw new Error("invalid_arguments");
+  }
+  const canonical = path.join(parent, path.basename(candidate));
+  if (canonical !== candidate || !withinTrustedRoot(canonical)) {
+    throw new Error("invalid_arguments");
+  }
+  return canonical;
+}
 
 function usage() {
   return [
@@ -30,8 +99,10 @@ async function audit(arguments_) {
   ) {
     throw new Error("invalid_arguments");
   }
-  const policy = await readPolicyFile(arguments_[0]);
-  const built = await writeAuditBundle(policy, arguments_[2]);
+  const policy = await readPolicyFile(
+    validatedInputPath(arguments_[0]),
+  );
+  const built = await writeAuditBundle(policy, validatedOutputPath(arguments_[2]));
   const summary = built.receipt.result.summary;
   process.stdout.write(
     [
@@ -55,7 +126,11 @@ async function analyze(arguments_) {
     throw new Error("invalid_arguments");
   }
   process.stdout.write(
-    json(analyzePolicy(await readPolicyFile(arguments_[0]))),
+    json(
+      analyzePolicy(
+        await readPolicyFile(validatedInputPath(arguments_[0])),
+      ),
+    ),
   );
 }
 
@@ -63,8 +138,12 @@ async function verify(arguments_) {
   if (arguments_.length !== 2 || arguments_.some((item) => item.startsWith("-"))) {
     throw new Error("invalid_arguments");
   }
-  const policy = await readPolicyFile(arguments_[0]);
-  const receipt = await readStrictJsonFile(arguments_[1]);
+  const policy = await readPolicyFile(
+    validatedInputPath(arguments_[0]),
+  );
+  const receipt = await readStrictJsonFile(
+    validatedInputPath(arguments_[1]),
+  );
   process.stdout.write(json(verifyReceipt(policy, receipt)));
 }
 
@@ -82,14 +161,34 @@ async function serve(arguments_) {
   await runServerUntilSignal({ port });
 }
 
-async function main(argv) {
-  const [command, ...arguments_] = argv;
-  if (command === "audit") return audit(arguments_);
-  if (command === "analyze") return analyze(arguments_);
-  if (command === "verify") return verify(arguments_);
-  if (command === "serve") return serve(arguments_);
+function invalidCommand() {
   process.stderr.write(usage() + "\n");
   process.exitCode = 64;
+}
+
+function canonicalCommand(value) {
+  if (value === "audit") return "audit";
+  if (value === "analyze") return "analyze";
+  if (value === "serve") return "serve";
+  if (value === "verify") return "verify";
+  return undefined;
+}
+
+async function main(argv) {
+  const command = canonicalCommand(argv[0]);
+  const arguments_ = argv.slice(1);
+  switch (command) {
+    case "audit":
+      return audit(arguments_);
+    case "analyze":
+      return analyze(arguments_);
+    case "serve":
+      return serve(arguments_);
+    case "verify":
+      return verify(arguments_);
+    default:
+      return invalidCommand();
+  }
 }
 
 try {

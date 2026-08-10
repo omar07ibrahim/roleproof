@@ -124,3 +124,16 @@ test("usage and malformed receipts fail without stack traces", async () => {
     await rm(temporary, { recursive: true, force: true });
   }
 });
+
+test("CLI rejects unsafe path syntax before filesystem access", () => {
+  for (const arguments_ of [
+    ["analyze", "../outside.json"],
+    ["analyze", "unsafe path.json"],
+    ["audit", "examples/orion.synthetic.json", "--out", "../bundle"],
+    ["verify", "examples/orion.synthetic.json", "nested/../../receipt.json"],
+  ]) {
+    const completed = run(...arguments_);
+    assert.equal(completed.status, 64, arguments_.join(" "));
+    assert.equal(completed.stderr, "roleproof: invalid_arguments\n");
+  }
+});
