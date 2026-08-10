@@ -360,6 +360,9 @@ function validateFindings(policy, result, model, principalModels) {
       violated = principalState.grants.has(
         constraint.resource + "\u0000" + constraint.action,
       );
+      if (finding.status !== (violated ? "violation" : "pass")) {
+        fail("invalid_finding_status");
+      }
       if (violated) {
         if (finding.witnesses.length !== 1) fail("invalid_witness_count");
         validateGrantWitness(
@@ -395,6 +398,9 @@ function validateFindings(policy, result, model, principalModels) {
       violated = constraint.roles.every((role) =>
         principalState.reachable.has(role),
       );
+      if (finding.status !== (violated ? "violation" : "pass")) {
+        fail("invalid_finding_status");
+      }
       if (violated) {
         if (finding.witnesses.length !== 2) fail("invalid_witness_count");
         for (let item = 0; item < constraint.roles.length; item += 1) {
