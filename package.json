@@ -5,6 +5,12 @@
   "type": "module",
   "private": false,
   "license": "MIT",
+  "bin": {
+    "roleproof": "src/cli.mjs"
+  },
+  "exports": {
+    ".": "./src/api.mjs"
+  },
   "engines": {
     "node": ">=22 <25"
   },
