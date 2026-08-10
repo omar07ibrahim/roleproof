@@ -1,5 +1,5 @@
 import { constants } from "node:fs";
-import { lstat, mkdir, open, rm } from "node:fs/promises";
+import { mkdir, open, rm } from "node:fs/promises";
 import path from "node:path";
 
 import { parseJsonStrict, StrictJsonError } from "./json.mjs";
@@ -26,33 +26,35 @@ function sameFile(left, right) {
 }
 
 export async function readStrictJsonFile(filePath, maximum = MAX_RECEIPT_BYTES) {
-  let visible;
-  try {
-    visible = await lstat(filePath, { bigint: true });
-  } catch {
-    throw new IoBoundaryError("unreadable_input");
-  }
-  if (
-    !visible.isFile() ||
-    visible.isSymbolicLink() ||
-    visible.size < 1 ||
-    visible.size > maximum
-  ) {
+  if (typeof constants.O_NOFOLLOW !== "number") {
     throw new IoBoundaryError("invalid_input_file");
   }
   const flags =
     constants.O_RDONLY |
     (constants.O_CLOEXEC ?? 0) |
-    (constants.O_NOFOLLOW ?? 0);
+    constants.O_NOFOLLOW;
   let handle;
   try {
     handle = await open(filePath, flags);
+  } catch (error) {
+    if (error?.code === "ELOOP") {
+      throw new IoBoundaryError("invalid_input_file");
+    }
+    throw new IoBoundaryError("unreadable_input");
+  }
+  try {
     const opened = await handle.stat({ bigint: true });
-    if (!sameFile(visible, opened)) throw new IoBoundaryError("input_changed");
+    if (
+      !opened.isFile() ||
+      opened.isSymbolicLink() ||
+      opened.size < 1 ||
+      opened.size > BigInt(maximum)
+    ) {
+      throw new IoBoundaryError("invalid_input_file");
+    }
     const payload = await handle.readFile();
     const completed = await handle.stat({ bigint: true });
-    const final = await lstat(filePath, { bigint: true });
-    if (!sameFile(opened, completed) || !sameFile(opened, final)) {
+    if (!sameFile(opened, completed)) {
       throw new IoBoundaryError("input_changed");
     }
     let text;
@@ -70,7 +72,7 @@ export async function readStrictJsonFile(filePath, maximum = MAX_RECEIPT_BYTES) 
       throw error;
     }
   } finally {
-    if (handle !== undefined) await handle.close();
+    await handle.close();
   }
 }
 
