@@ -97,8 +97,12 @@ jobs:
           for (const path of paths) {
             if (
               path.startsWith(".github/") ||
+              path.startsWith("docs/") ||
               path.startsWith("node_modules/") ||
-              path.startsWith("test/")
+              path.startsWith("requirements/") ||
+              path.startsWith("test/") ||
+              path.startsWith("tools/") ||
+              path.startsWith("web/")
             ) {
               throw new Error("unexpected_package_file:" + path);
             }

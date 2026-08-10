@@ -72,8 +72,8 @@ committed for inspection.
 Requirements: Node.js 22 or 24. CI pins both supported lines exactly.
 
 ```bash
-git clone https://github.com/omar07ibrahim/test2.git
-cd test2
+git clone https://github.com/omar07ibrahim/roleproof.git
+cd roleproof
 npm ci --ignore-scripts
 npm test
 npm run build

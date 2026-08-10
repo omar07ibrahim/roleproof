@@ -2,9 +2,26 @@
   "name": "roleproof",
   "version": "0.1.0",
   "description": "Dependency-free symbolic access-policy analysis with independently verified escalation witnesses.",
+  "keywords": [
+    "authorization",
+    "explainable-ai",
+    "iam",
+    "policy-analysis",
+    "rbac",
+    "security",
+    "symbolic-ai"
+  ],
   "type": "module",
   "private": false,
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/omar07ibrahim/roleproof.git"
+  },
+  "bugs": {
+    "url": "https://github.com/omar07ibrahim/roleproof/issues"
+  },
+  "homepage": "https://github.com/omar07ibrahim/roleproof#readme",
   "bin": {
     "roleproof": "src/cli.mjs"
   },
@@ -16,11 +33,8 @@
   },
   "files": [
     "dist",
-    "docs",
     "examples",
     "src",
-    "tools",
-    "web",
     "README.md",
     "SECURITY.md",
     "LICENSE"
