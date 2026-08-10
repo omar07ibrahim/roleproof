@@ -1,6 +1,9 @@
 #!/usr/bin/env node
 
+import { realpathSync } from "node:fs";
+import os from "node:os";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 import { analyzePolicy } from "./analyze.mjs";
 import { writeAuditBundle } from "./bundle.mjs";
@@ -10,8 +13,15 @@ import { runServerUntilSignal } from "./server.mjs";
 import { verifyReceipt } from "./verify.mjs";
 
 const SAFE_PATH = /^(?:\/)?[A-Za-z0-9._-]+(?:\/[A-Za-z0-9._-]+)*$/u;
+const PACKAGE_ROOT = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  "..",
+);
+const TRUSTED_ROOTS = Object.freeze(
+  [...new Set([process.cwd(), os.tmpdir(), PACKAGE_ROOT].map(realpathSync))],
+);
 
-function validatedPath(value) {
+function normalizedPath(value) {
   if (
     typeof value !== "string" ||
     value.length < 1 ||
@@ -22,6 +32,42 @@ function validatedPath(value) {
     throw new Error("invalid_arguments");
   }
   return path.resolve(value);
+}
+
+function withinTrustedRoot(candidate) {
+  return TRUSTED_ROOTS.some((root) => {
+    const prefix = root.endsWith(path.sep) ? root : root + path.sep;
+    return candidate.startsWith(prefix);
+  });
+}
+
+function validatedInputPath(value) {
+  const candidate = normalizedPath(value);
+  let canonical;
+  try {
+    canonical = realpathSync(candidate);
+  } catch {
+    throw new Error("invalid_arguments");
+  }
+  if (canonical !== candidate || !withinTrustedRoot(canonical)) {
+    throw new Error("invalid_arguments");
+  }
+  return canonical;
+}
+
+function validatedOutputPath(value) {
+  const candidate = normalizedPath(value);
+  let parent;
+  try {
+    parent = realpathSync(path.dirname(candidate));
+  } catch {
+    throw new Error("invalid_arguments");
+  }
+  const canonical = path.join(parent, path.basename(candidate));
+  if (canonical !== candidate || !withinTrustedRoot(canonical)) {
+    throw new Error("invalid_arguments");
+  }
+  return canonical;
 }
 
 function usage() {
@@ -48,9 +94,9 @@ async function audit(arguments_) {
     throw new Error("invalid_arguments");
   }
   const policy = await readPolicyFile(
-    validatedPath(arguments_[0]),
+    validatedInputPath(arguments_[0]),
   );
-  const built = await writeAuditBundle(policy, validatedPath(arguments_[2]));
+  const built = await writeAuditBundle(policy, validatedOutputPath(arguments_[2]));
   const summary = built.receipt.result.summary;
   process.stdout.write(
     [
@@ -76,7 +122,7 @@ async function analyze(arguments_) {
   process.stdout.write(
     json(
       analyzePolicy(
-        await readPolicyFile(validatedPath(arguments_[0])),
+        await readPolicyFile(validatedInputPath(arguments_[0])),
       ),
     ),
   );
@@ -87,10 +133,10 @@ async function verify(arguments_) {
     throw new Error("invalid_arguments");
   }
   const policy = await readPolicyFile(
-    validatedPath(arguments_[0]),
+    validatedInputPath(arguments_[0]),
   );
   const receipt = await readStrictJsonFile(
-    validatedPath(arguments_[1]),
+    validatedInputPath(arguments_[1]),
   );
   process.stdout.write(json(verifyReceipt(policy, receipt)));
 }
