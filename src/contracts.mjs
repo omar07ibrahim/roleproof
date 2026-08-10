@@ -209,10 +209,10 @@ export function parsePolicyBytes(payload) {
     document = parseJsonStrict(decoded);
   } catch (error) {
     if (error instanceof StrictJsonError) {
-      throw new PolicyError("invalid_json", "$") from error;
+      throw new PolicyError("invalid_json", "$");
     }
     if (error instanceof TypeError) {
-      throw new PolicyError("invalid_encoding", "$") from error;
+      throw new PolicyError("invalid_encoding", "$");
     }
     throw error;
   }
