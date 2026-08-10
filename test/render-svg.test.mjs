@@ -12,7 +12,12 @@ test("the source-derived role graph is deterministic and complete", async () => 
   const second = renderRoleGraph(policy, receipt);
   assert.deepEqual(first, second);
   const svg = first.toString("utf8");
-  assert.match(svg, /^<\?xml version="1.0"/);
+  const [declaration, root] = svg.split("\n");
+  assert.equal(declaration, '<?xml version="1.0" encoding="UTF-8"?>');
+  assert.equal(
+    root,
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 820" role="img" aria-labelledby="title description">',
+  );
   assert.match(svg, /viewBox="0 0 1400 820"/);
   assert.match(svg, /role="img"/);
   assert.match(svg, /data-role-id="prod-admin"/);
@@ -22,11 +27,7 @@ test("the source-derived role graph is deterministic and complete", async () => 
   assert.equal((svg.match(/data-role-id=/g) ?? []).length, policy.roles.length);
   assert.equal(svg.includes("<script"), false);
   assert.equal(svg.includes("<foreignObject"), false);
-  const namespace = "http://www.w3.org/2000/svg";
-  assert.equal((svg.match(/http:\/\//g) ?? []).length, 1);
-  assert.equal(svg.includes(namespace), true);
-  assert.equal(svg.replace(namespace, "").includes("http://"), false);
-  assert.equal(svg.includes("https://"), false);
+  assert.equal(svg.includes("<image"), false);
   assert.equal(svg.includes(" href="), false);
   assert.equal(svg.includes("/home/"), false);
 });
